@@ -1,0 +1,196 @@
+{% load static %}
+{% load pwa %}
+{% load webpush_notifications %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{% static 'images/logo.png' %}">
+    <meta name = "keywords" content = "" />
+    <meta name = "description" content = "" />
+    <title>Split Bill</title>
+     <!--outer styles -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'fontawesome-free/css/all.min.css' %}">
+	<link rel="stylesheet" href="{% static 'css/hover-min.css' %}">
+	<link rel="stylesheet" href="{% static 'css/animation_library.css' %}">
+    <!--my style -->
+    {% webpush_header %}
+    {% progressive_web_app_meta %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body dir="ltr">
+    
+    <!-- Start header -->
+    <header>
+        <nav class="navbar navbar-dark bg_primary_color px-lg-4">
+            <!-- Navbar content -->
+            <div class="row m-0 justify-content-between w-100">
+                <div class="col-9 col-md-auto py-2">
+                    <div class="row">
+                        <div class="col-2 col-md-auto">
+                            <i class="fa-solid fa-circle-user rounded-circle mt-1 text-white fs-1"></i>
+                        </div>
+                        <div class="col-9 col-md ">
+                            <p class="m-0 text-white Tajawal-Bold">Yousif sailan</p>
+                            <p class="m-0 text-white Tajawal-Bold">Admin</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3 col-md-auto col-lg-3 mb-md-0 py-2 ">
+                    <!--start menu icon-->
+                    <span class="material-symbols-outlined d-flex justify-content-end fs-3 d-lg-none  hvr-pulse mt-1 text-white menu-icon mt-3">
+                        menu_open
+                    </span>
+                    <i class="fa-solid fa-arrow-left-long  d-flex justify-content-end hvr-pulse small-icon d-none text-white mt-3"></i>
+                    {% webpush_button with_class="btn" %}
+                </div>
+            </div>
+          </nav>
+    </header>
+    <div>
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+        <div class="alert {{ message.tags }} alert-dismissible fade show m-0" role="alert" style="z-index:999" >
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            {{ message }}
+        </div>
+        </div>
+    {% endfor %}
+    </div>
+    <!-- End header -->
+    
+    <!-- Start sidebar -->
+    <div class="sidebar d-none d-lg-block pt-4 bg_scoundry_color">
+        <!-- start navbar -->
+        {% include 'partials/navbar.html' %}
+        <div class="text-center absolute_buttom">
+            <a href="{% url 'account:logout' %}" class="btn btn-primary vhr-float">
+            <span class="material-symbols-outlined mt-lg-1">
+                logout
+            </span>
+            Logout</a>
+        </div>
+
+    </div>
+    <!-- End sidebar -->
+        
+    <!-- Start body -->
+    <div class="body py-4 px-2 px-lg-4">
+
+        <!-- Add new User button-->
+        <button type="button" class="btn btn-primary vhr-float mb-2" data-bs-toggle="modal" data-bs-target="#addNewUser">
+            <span class="material-symbols-outlined mt-lg-1">
+                add
+            </span>
+            Add New User
+        </button>
+        <!-- Users Table-->
+        <div class="p-3 bg_scoundary_color mt-1">
+            <h4 class="Tajawal-Bold">Users</h4>
+            <hr>
+            {% include 'partials/users.html' %}
+            <!-- Pagination-->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                {% if users.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page1={{ users.previous_page_number }}" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                {% endif %}
+                  
+                {% for object in users.paginator.page_range %}
+                <li class="page-item"><a class="page-link" href="?page1={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+            {% endfor %} 
+                  {% if users.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page1={{ users.next_page_number }}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                  
+                </ul>
+              </nav>
+        </div>
+
+        <!-- Add new Transaction Category button-->
+        <button type="button" class="btn btn-primary vhr-float mb-2 mt-5" data-bs-toggle="modal" data-bs-target="#addNewCategory">
+            <span class="material-symbols-outlined mt-lg-1">
+                add
+            </span>
+            Add New Category
+        </button>
+
+         <!-- Transaction Category Table-->
+         <div class="p-3 bg_scoundary_color mt-1">
+            <h4 class="Tajawal-Bold">Transaction Category</h4>
+            <hr>
+            {% include 'partials/categories.html' %}
+            <!-- Pagination-->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                {% if categories.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page2={{ categories.previous_page_number }}" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                {% endif %}
+                  
+                {% for object in categories.paginator.page_range %}
+                <li class="page-item"><a class="page-link" href="?page2={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+            {% endfor %} 
+                  {% if categories.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page2={{ categories.next_page_number }}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                  
+                </ul>
+              </nav>
+        </div>
+    </div>
+    <!-- End body -->
+
+    <!-- Start footer -->
+    <footer class="body text-center py-3 mt-3">
+        <p class="primary_color">All rights reserved 2023 © Split Bill System.</p>
+    </footer>
+    <!-- End footer -->
+
+<!-- All Models Here..... -->
+
+    <!--delate Confirm Modal -->
+    {% include 'partials/delete_confirm.html' %}
+
+    <!--Add new User Modal -->
+    {% include 'partials/add_user.html' %}
+    {% include 'partials/change_password.html' %}
+    <!--Edit User Modal -->
+    {% include 'partials/edit_user.html' %}    
+
+    <!--Add new Category Modal -->
+    {% include 'partials/add_category.html' %}
+    <!--Edit Category Modal -->
+    {% include 'partials/edit_category.html' %}
+    {% include 'partials/delete_confirm_category.html' %}
+    
+
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'js/backend.js' %}"></script>
+    <script src="{% static 'js/myscript.js' %}"></script>
+   
+
+</body>
+
+</html>

@@ -1,0 +1,54 @@
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+            <th scope="col">#</th>
+            <th scope="col">Category name</th>
+            <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories %}
+            <tr>
+                <th scope="row">{{category.id}}</th>
+                <td>{{category.name}}</td>
+                <td class="text-center text-md-end">
+                    <button type="button" onclick="delete_category({{category.id}})" class="btn btn-danger mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#delete-confirm-category">Delete</button>
+                    <button type="button" onclick="edit_category({{category.id}})" class="btn btn-warning mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#editCategory">Edit</button>
+                </td>
+            </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>
+</div>
+
+<script>
+    
+    var ct_pk = 0;
+    
+    function delete_category(id)
+    {
+        ct_pk = id;
+    }
+
+    function delete_confirm_category()
+    {
+        $.ajax({
+            url : "/panel/delete/"+ct_pk+"/", // create institution
+            //type : "POST", // http method
+            //data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                window.location.reload();
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+    }
+</script>

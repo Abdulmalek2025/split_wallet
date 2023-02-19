@@ -1,0 +1,37 @@
+<div class="navbar">
+    <ul class="list-group list-group-flush px-3 pt-4 w-100">
+        <li class="list-group-item "> 
+            <a href="{% url 'index' %}">
+                <span class="material-symbols-outlined">
+                    home
+                </span>
+                <span class="big_menu">Main page</span>  
+            </a>
+        </li>
+        <li class="list-group-item active"> 
+            <a href="{% url 'requests' %}">
+                <span class="material-symbols-outlined">
+                    import_contacts
+                </span>
+                <span class="big_menu">Requests</span> 
+                <div class="pulse"></div> 
+            </a>
+        </li>
+        <li class="list-group-item "> 
+            <a href="{% url 'report' %}">
+                <span class="material-symbols-outlined">
+                    query_stats
+                </span>
+                <span class="big_menu">Report</span>  
+            </a>
+        </li>
+        <li class="list-group-item "> 
+            <a href="{% url 'panel' %}">
+                <span class="material-symbols-outlined">
+                    manage_accounts
+                </span>
+                <span class="big_menu">Admin Panel</span>  
+            </a>
+        </li>
+    </ul>
+</div>

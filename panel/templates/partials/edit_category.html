@@ -1,0 +1,68 @@
+<div class="modal fade" id="editCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog ">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit Category</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+            <form action="" novalidate method="post" id="edit-category-form">
+                {% csrf_token %}
+                <input type="hidden" name="category_id" id="category_id">
+                <div class="mb-3">
+                    <label for="Categoryname" class="form-label">
+                        <span class="material-symbols-outlined">
+                            category
+                        </span>
+                        <span>Transaction Category Name</span>
+                    </label>
+                    {{category_form.name}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-name"></li>
+                        </ul>
+                        </div>
+                </div>
+                
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary mb-3  hvr-float w-100">Save Change</button>
+                </div>
+                
+            </form>
+        </div>
+
+        
+    </div>
+    </div>
+</div>
+
+<script>
+    function edit_category(id)
+    {
+        $.ajax({
+            url : "/panel/edit-category/"+id+"/", // create institution
+            //type : "POST", // http method
+            //data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                res = JSON.parse(res)
+                console.log(res)
+                for (const [key,value] of Object.entries(res))
+                {
+                    $("#edit-category-form #id_"+key).val(value)
+                }
+                $("#category_id").val(res.id)
+                
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+    }
+    
+</script>

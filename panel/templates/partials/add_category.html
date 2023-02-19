@@ -1,0 +1,37 @@
+<div class="modal fade" id="addNewCategory" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog ">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Add New Category</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+            <form action="{% url 'add_category' %}" id="add-category-form" method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="Categoryname" class="form-label">
+                        <span class="material-symbols-outlined">
+                            category
+                        </span>
+                        <span>Transaction Category Name</span>
+                    </label>
+                    {{category_form.name}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-name"></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary mb-3  hvr-float w-100">Save</button>
+                </div>
+                
+            </form>
+        </div>
+
+        
+    </div>
+    </div>
+</div>

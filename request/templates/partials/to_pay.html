@@ -1,0 +1,120 @@
+<div class="p-3 bg_scoundary_color mt-2">
+    <h4 class="Tajawal-Bold">To Pay</h4>
+    <hr>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                <th scope="col">#</th>
+                <th scope="col">Transaction Category </th>
+                <th scope="col">Date</th>
+                <th scope="col">Amount</th>
+                <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if to_pay %}
+                {% for request in to_pay %}
+                <tr>
+                    <th scope="row">{{request.id}}</th>
+                    <td>{{request.category}}</td>
+                    <td>{{request.start_at}}</td>
+                    <td>{{request.user_amount}}</td>
+                    <td class="text-center text-md-end">
+                    <button type="button" onclick="approve({{request.id}})"  class="btn btn-success mb-2 mb-md-0">Approve</button>
+                    <button type="button" onclick="review({{request.id}})" data-bs-toggle="modal" data-bs-target="#newRequest" class="btn btn-primary">Review</button>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                <td class="text-center" colspan="5">No transactions available</td>
+                </tr>
+                {% endif %}
+               
+                
+            </tbody>
+        </table>
+     </div>
+     {% if to_pay %}
+     <!-- Pagination-->
+    <nav aria-label="Page navigation example">
+        <ul class="pagination justify-content-center">
+            {% if to_pay.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page1={{ to_pay.previous_page_number }}" aria-label="Previous">
+                  <span aria-hidden="true">&laquo;</span>
+                </a>
+              </li>
+            {% endif %}
+            {% for object in to_pay.paginator.page_range %}
+            <li class="page-item"><a class="page-link" href="?page1={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+            {% endfor %} 
+            {% if to_pay.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page1={{ to_pay.next_page_number }}" aria-label="Next">
+                  <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+          
+        </ul>
+    </nav>
+     {% endif %}
+    
+</div>
+
+<script>
+    function review(id)
+    {
+        $.ajax({
+            url : "/request/review/"+id, // create institution
+            //type : "POST", // http method
+            //data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                re = $(res)
+                $("#id_category").replaceWith(re[0])
+                $("#id_category").prop('disabled',true)
+                $("#id_users").replaceWith(re[1])
+                $("#id_users input").prop('disabled',true)
+                $("#id_start_at").replaceWith(re[2])
+                $("#id_start_at").prop('disabled',true)
+                $("#id_amount").replaceWith(re[3])
+                $("#id_amount").prop('disabled',true)
+                $("#id_attachment").replaceWith(re[4])
+                $("#id_attachment").prop('disabled',true)
+                $("#id_note").replaceWith(re[5])
+                $("#id_note").prop('disabled',true)
+
+                console.log(re)
+            },
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+    }
+
+
+    function approve(id)
+    {
+        $.ajax({
+            url : "/request/pay/"+id, // create institution
+            //type : "POST", // http method
+            //data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                window.location.reload()
+            },
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+    }
+</script>
