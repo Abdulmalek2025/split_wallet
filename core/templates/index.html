@@ -67,7 +67,7 @@
     <!-- Start sidebar -->
     <div class="sidebar d-none d-lg-block pt-4 bg_scoundry_color">
         <!-- start navbar -->
-        {% include 'partials/navbar.html' %}
+        {% include 'core/navbar.html' %}
         <div class="text-center absolute_buttom">
             <a href="{% url 'account:logout' %}"  class="btn btn-primary vhr-float">
             <span class="material-symbols-outlined mt-lg-1">
@@ -145,7 +145,7 @@
         <div class="p-3 bg_scoundary_color mt-5">
             <h4 class="Tajawal-Bold">Recent Transactions</h4>
             <hr>
-            {% include 'partials/requests.html' %}
+            {% include 'core/requests.html' %}
             <!-- Pagination-->
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-center">
@@ -198,13 +198,13 @@
     </div>
 
     <!--Add new Request Modal -->
-    {% include 'partials/new_request.html' %}
+    {% include 'core/new_request.html' %}
 
     <!--Add Reserved Income Modal -->
-    {% include 'partials/new_income.html' %}
+    {% include 'core/new_income.html' %}
 
     <!--Add Reserved to Available Modal -->
-    {% include 'partials/new_available.html' %}
+    {% include 'core/new_available.html' %}
     
 
     <script src="{% static 'js/jquery.min.js' %}"></script>

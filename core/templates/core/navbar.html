@@ -13,8 +13,11 @@
                 <span class="material-symbols-outlined">
                     import_contacts
                 </span>
-                <span class="big_menu">Requests</span> 
+                <span class="big_menu">Requests</span>
+                {% if has_notify %}
                 <div class="pulse"></div> 
+                {% endif %} 
+                
             </a>
         </li>
         <li class="list-group-item "> 
@@ -25,6 +28,7 @@
                 <span class="big_menu">Report</span>  
             </a>
         </li>
+        {% if request.user.is_superuser %}
         <li class="list-group-item "> 
             <a href="{% url 'panel' %}">
                 <span class="material-symbols-outlined">
@@ -33,5 +37,7 @@
                 <span class="big_menu">Admin Panel</span>  
             </a>
         </li>
+        {% endif %}
+        
     </ul>
 </div>

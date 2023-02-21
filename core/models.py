@@ -10,12 +10,14 @@ from django.core.exceptions import ValidationError
 
 def check_percentage(value):
     percentage = Wallet.objects.all().aggregate(Sum('share_percentage'))
-    percentage['share_percentage__sum'] += value
-    if percentage['share_percentage__sum'] < 100:
-        return value
+    if percentage is not None:
+        percentage['share_percentage__sum'] += value
+        if percentage['share_percentage__sum'] < 100 or percentage['share_percentage__sum'] == 100:
+            return value
+        else:
+            raise ValidationError('Use less value')
     else:
-        raise ValidationError('Use less value')
-
+        return value
 
 class Wallet(models.Model):
     user = models.OneToOneField(User,on_delete=models.CASCADE,related_name='wallet')

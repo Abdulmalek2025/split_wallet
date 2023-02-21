@@ -5,10 +5,14 @@ from django.shortcuts import render, redirect
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from account.forms import SignUpForm, EditForm, SetPasswordForm
 from core.forms import WalletForm
+from request.models import Request
 from django.contrib.auth.models import User
+from django.db.models import Q
 from .models import Category
 from .forms import CategoryForm
 # Create your views here.
+
+
 
 def panel(request):
     signup_form = SignUpForm()
@@ -34,7 +38,13 @@ def panel(request):
         categories = paginator.page(1)
     except EmptyPage:
         categories = paginator.page(paginator.num_pages)
-    return render(request,'admin_panel.html', context={'signup_form':signup_form,'wallet_form':wallet_form,'edit_form':edit_form,'password_change':password_change_form,'category_form':category_form,'users':users,'categories':categories})
+    to_pay = Request.objects.filter((Q(amount__lte=request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[request.user]),users__in=[request.user],is_pay=False)
+    to_approve = Request.objects.filter(is_approved=False)
+    if len(to_pay) == 0 and len(to_approve) == 0:
+        has_notify = False
+    else:
+        has_notify = True
+    return render(request,'admin_panel.html', context={'signup_form':signup_form,'wallet_form':wallet_form,'edit_form':edit_form,'password_change':password_change_form,'category_form':category_form,'users':users,'categories':categories,'has_notify':has_notify})
 
 
 def add_category(request):

@@ -38,18 +38,29 @@ class ReportView(LoginRequiredMixin,ListView):
             header.append(category.name)
         arr.append(header)
  
-        dates = Request.objects.values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
-        for date in dates:
-            lts = [0]* len(header)
-            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-            c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
-            for c1 in c:
-                for cat in categories:
-                    if c1['category__name'] == cat.name:
-                        lts[header.index(cat.name)] = float(c1['total'])
+        dates = Request.objects.filter(Q(owner=self.request.user)|Q(users__in=[self.request.user])).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
+        if len(dates) > 0:
+            for date in dates:
+                lts = [0]* len(header)
+                lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
+                c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+                for c1 in c:
+                    for cat in categories:
+                        if c1['category__name'] == cat.name:
+                            lts[header.index(cat.name)] = float(c1['total'])
+                arr.append(lts)
+        else:
+            lts = [0]*len(header)
             arr.append(lts)
         context['list'] = arr 
         context['users'] = User.objects.all()
+        to_pay = Request.objects.filter((Q(amount__lte=self.request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[self.request.user]),users__in=[self.request.user],is_pay=False)
+        to_approve = Request.objects.filter(is_approved=False)
+        if len(to_pay) == 0 and len(to_approve) == 0:
+            has_notify = False
+        else:
+            has_notify = True
+        context['has_notify'] = has_notify
         return context
 
 
@@ -65,35 +76,48 @@ def filter_user(request,user):
         dates = Request.objects.filter(Q(owner=User.objects.get(id=user).id) | Q(users__in=[User.objects.get(id=user)])).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
     else:
         dates = Request.objects.all().values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
-    for date in dates:
+    if len(dates) > 0:
+        for date in dates:
+            lts = [0]* len(header)
+            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
+            c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            for c1 in c:
+                for cat in categories:
+                    if c1['category__name'] == cat.name:
+                        lts[header.index(cat.name)] = float(c1['total'])
+            arr.append(lts)
+    else:
         lts = [0]* len(header)
-        lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-        c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
-        for c1 in c:
-            for cat in categories:
-                if c1['category__name'] == cat.name:
-                    lts[header.index(cat.name)] = float(c1['total'])
         arr.append(lts)
     return HttpResponse(json.dumps({'data':arr}))
 
 def filter_category(request,category):
-    cat = Category.objects.get(id=category)
-    categories = Category.objects.filter(name = cat.name,name__isnull=False).order_by('name')
+    if category > 0:
+        cat = Category.objects.get(id=category)
+        categories = Category.objects.filter(name = cat.name,name__isnull=False).order_by('name')
+    else:
+        cat = Category.objects.all()
+        categories = Category.objects.all().order_by('name')
+    
     header = ['Month']
     arr = []
     for category in categories:
         header.append(category.name)
     arr.append(header)
 
-    dates = Request.objects.filter().values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
-    for date in dates:
+    dates = Request.objects.filter(Q(owner=request.user)|Q(users__in=[request.user])).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
+    if len(dates) >0:
+        for date in dates:
+            lts = [0]* len(header)
+            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
+            c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            for c1 in c:
+                for cat in categories:
+                    if c1['category__name'] == cat.name:
+                        lts[header.index(cat.name)] = float(c1['total'])
+            arr.append(lts)
+    else:
         lts = [0]* len(header)
-        lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-        c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
-        for c1 in c:
-            for cat in categories:
-                if c1['category__name'] == cat.name:
-                    lts[header.index(cat.name)] = float(c1['total'])
         arr.append(lts)
     return HttpResponse(json.dumps({'data':arr}))
 
@@ -106,16 +130,20 @@ def filter_start(request,start):
         header.append(category.name)
     arr.append(header)
 
-    dates = Request.objects.filter(start_at__gte=start).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
-    for date in dates:
-        lts = [0]* len(header)
-        lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-        c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
-        for c1 in c:
-            for cat in categories:
-                if c1['category__name'] == cat.name:
-                    lts[header.index(cat.name)] = float(c1['total'])
-        arr.append(lts)
+    dates = Request.objects.filter(Q(owner=request.user)|Q(users__in=[request.user]),start_at__gte=start).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
+    if len(dates) > 0:
+        for date in dates:
+            lts = [0]* len(header)
+            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
+            c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            for c1 in c:
+                for cat in categories:
+                    if c1['category__name'] == cat.name:
+                        lts[header.index(cat.name)] = float(c1['total'])
+            arr.append(lts)
+    else:
+       lts = [0]* len(header)
+       arr.append(lts)
     return HttpResponse(json.dumps({'data':arr}))
 
 def filter_end(request,end):
@@ -126,15 +154,19 @@ def filter_end(request,end):
         header.append(category.name)
     arr.append(header)
 
-    dates = Request.objects.filter(start_at__lte=end).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
-    for date in dates:
+    dates = Request.objects.filter(Q(owner=request.user)|Q(users__in=[request.user]),start_at__lte=end).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
+    if len(dates) > 0:
+        for date in dates:
+            lts = [0]* len(header)
+            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
+            c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            for c1 in c:
+                for cat in categories:
+                    if c1['category__name'] == cat.name:
+                        lts[header.index(cat.name)] = float(c1['total'])
+            arr.append(lts)
+    else:
         lts = [0]* len(header)
-        lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-        c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
-        for c1 in c:
-            for cat in categories:
-                if c1['category__name'] == cat.name:
-                    lts[header.index(cat.name)] = float(c1['total'])
         arr.append(lts)
     return HttpResponse(json.dumps({'data':arr}))
 
@@ -150,7 +182,10 @@ def download_file(request):
     writer.writerow([''])
     writer.writerow(['Category', 'Owner','Date','Amount','Pay users','Participants','Note','Attachment'])
     try:
-        requests = Request.objects.all()
+        if request.user.is_superuser:
+            requests = Request.objects.all()
+        else:
+            requests = Request.objects.filter(Q(owner=request.user)|Q(users__in=[request.user]))
     except Request.DoesNotExist:
         requests = None
     if requests is not None:
@@ -166,4 +201,6 @@ def download_file(request):
             writer.writerow([request.category,request.owner,request.start_at,request.amount,pay_list,users,request.note,request.attachment])
             users.clear()
             pay_list.clear()
+    else:
+        writer.writerow(['','','','','','','',''])
     return response

@@ -24,7 +24,7 @@ def requests(request):
     except EmptyPage:
         to_pay = paginator.page(paginator.num_pages)
 
-    to_approve = Request.objects.filter(is_approved=False,users__in=[request.user])
+    to_approve = Request.objects.filter(is_approved=False)
     paginator = Paginator(to_approve,10)
     page = request.GET.get('page2')
     try:
@@ -34,7 +34,11 @@ def requests(request):
     except EmptyPage:
         to_approve = paginator.page(paginator.num_pages)
     request_form = RequestForm()
-    context = {'to_pay':to_pay, 'to_approve':to_approve,'request_form':request_form}  
+    if len(to_approve) == 0 and len(to_pay) == 0:
+        has_notify = False
+    else:
+        has_notify = True
+    context = {'to_pay':to_pay, 'to_approve':to_approve,'request_form':request_form,'has_notify':has_notify}  
     return render(request,'requests.html',context)
 
 
@@ -151,11 +155,13 @@ def review(request,id):
     return HttpResponse(request_form)
 
 def pay(request, id):
+    # the request that I will pay for it
     me_request = Request.objects.get(id=id)
     wallet = Wallet.objects.get(user=request.user)
     #count number of users in the request and take from current user balance and add to the request owner balance
     wallet.available_balance -= me_request.user_amount
     wallet.save()
+    # the wallet of request owner that will pay for it
     reciever_wallet = Wallet.objects.get(user=me_request.owner)
     sender = Request.objects.create(amount=me_request.user_amount,owner=request.user,note='{0} pay to {1}'.format(request.user,me_request.owner),category=me_request.category,request_type='expense',start_at=datetime.datetime.now(),is_pay=True,is_approved=True)
     sender.pay_list.add(me_request.owner)

@@ -35,8 +35,15 @@
                             <i class="fa-solid fa-circle-user rounded-circle mt-1 text-white fs-1"></i>
                         </div>
                         <div class="col-9 col-md ">
-                            <p class="m-0 text-white Tajawal-Bold">Yousif sailan</p>
+                            <p class="m-0 text-white Tajawal-Bold">{{request.user.username}}</p>
+                            {% if request.user.is_superuser %}
                             <p class="m-0 text-white Tajawal-Bold">Admin</p>
+                            {% elif request.user.is_staff %}
+                            <p class="m-0 text-white Tajawal-Bold">Approver</p>
+                            {% else %}
+                            <p class="m-0 text-white Tajawal-Bold">User</p>
+                            {% endif %}
+                            
                         </div>
                     </div>
                 </div>
@@ -66,7 +73,7 @@
     <!-- Start sidebar -->
     <div class="sidebar d-none d-lg-block pt-4 bg_scoundry_color">
         <!-- start navbar -->
-        {% include 'partials/navbar.html' %}
+        {% include 'panel/navbar.html' %}
         <div class="text-center absolute_buttom">
             <a href="{% url 'account:logout' %}" class="btn btn-primary vhr-float">
             <span class="material-symbols-outlined mt-lg-1">
@@ -92,7 +99,7 @@
         <div class="p-3 bg_scoundary_color mt-1">
             <h4 class="Tajawal-Bold">Users</h4>
             <hr>
-            {% include 'partials/users.html' %}
+            {% include 'panel/users.html' %}
             <!-- Pagination-->
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-center">
@@ -131,7 +138,7 @@
          <div class="p-3 bg_scoundary_color mt-1">
             <h4 class="Tajawal-Bold">Transaction Category</h4>
             <hr>
-            {% include 'partials/categories.html' %}
+            {% include 'panel/categories.html' %}
             <!-- Pagination-->
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-center">
@@ -169,19 +176,19 @@
 <!-- All Models Here..... -->
 
     <!--delate Confirm Modal -->
-    {% include 'partials/delete_confirm.html' %}
+    {% include 'panel/delete_confirm.html' %}
 
     <!--Add new User Modal -->
-    {% include 'partials/add_user.html' %}
-    {% include 'partials/change_password.html' %}
+    {% include 'panel/add_user.html' %}
+    {% include 'panel/change_password.html' %}
     <!--Edit User Modal -->
-    {% include 'partials/edit_user.html' %}    
+    {% include 'panel/edit_user.html' %}    
 
     <!--Add new Category Modal -->
-    {% include 'partials/add_category.html' %}
+    {% include 'panel/add_category.html' %}
     <!--Edit Category Modal -->
-    {% include 'partials/edit_category.html' %}
-    {% include 'partials/delete_confirm_category.html' %}
+    {% include 'panel/edit_category.html' %}
+    {% include 'panel/delete_confirm_category.html' %}
     
 
     <script src="{% static 'js/jquery.min.js' %}"></script>

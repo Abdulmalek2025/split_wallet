@@ -9,7 +9,7 @@ from request.forms import RequestForm,ReversedIncomeForm, ReversedToAvailableFor
 from django.contrib import messages
 import json
 import datetime
-from django.db.models import Sum
+from django.db.models import Sum,Q
 # Create your views here.
 
 
@@ -26,7 +26,7 @@ class IndexView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
-        context['request_form'] = RequestForm()
+        context['request_form'] = RequestForm(initial={'users': [self.request.user.id]})
         context['request_form'].fields['category'].queryset = Category.objects.filter(visible=True)
         context['reversed_income_form'] = ReversedIncomeForm()
         income, in_created = Category.objects.get_or_create(name='Reserved Income to shareholders',visible=False)
@@ -35,10 +35,16 @@ class IndexView(LoginRequiredMixin, ListView):
         expense, ex_created = Category.objects.get_or_create(name='Reversed Available to shareholder',visible=False)
         context['reversed_to_available_form'].fields['category'].queryset = Category.objects.filter(name="Reversed Available to shareholder")
         today = datetime.datetime.now()
-        context['month_income'] =  Request.objects.filter(start_at__month=today.month, request_type='income').aggregate(Sum('amount'))
-        context['month_expense'] = Request.objects.filter(start_at__month=today.month, request_type='expense').aggregate(Sum('amount'))
+        context['month_income'] =  Request.objects.filter(start_at__month=today.month, request_type='income',owner=self.request.user).aggregate(Sum('amount'))
+        context['month_expense'] = Request.objects.filter(start_at__month=today.month, request_type='expense',owner=self.request.user).aggregate(Sum('amount'))
         context['wallet'] = Wallet.objects.get(user=self.request.user)
-        
+        to_pay = Request.objects.filter((Q(amount__lte=self.request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[self.request.user]),users__in=[self.request.user],is_pay=False)
+        to_approve = Request.objects.filter(is_approved=False)
+        if len(to_pay) == 0 and len(to_approve) == 0:
+            has_notify = False
+        else:
+            has_notify = True
+        context['has_notify'] = has_notify
         return context
     
 

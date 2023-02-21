@@ -64,7 +64,7 @@
     <!-- Start sidebar -->
     <div class="sidebar d-none d-lg-block pt-4 bg_scoundry_color">
         <!-- start navbar -->
-        {% include 'partials/navbar.html' %}
+        {% include 'navbar.html' %}
         <div class="text-center absolute_buttom">
             <a href="{% url 'account:logout' %}" class="btn btn-primary vhr-float">
             <span class="material-symbols-outlined mt-lg-1">
@@ -80,9 +80,9 @@
     <div class="body py-4 px-2 px-lg-4">
 
         <!-- To Pay Table-->
-        {% include 'partials/to_pay.html' %}
+        {% include 'request/to_pay.html' %}
         {% if user.is_staff %}
-        {% include 'partials/to_approve.html' %}
+        {% include 'request/to_approve.html' %}
         {% endif %}
          <!-- To Approve Table-->
          
@@ -113,7 +113,7 @@
     </div>
 
     <!--Add new Request Modal -->
-    {% include 'partials/review.html' %}
+    {% include 'request/review.html' %}
 
     <!--Add Reserved Income Modal -->
     <div class="modal fade" id="reservedIncome" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">

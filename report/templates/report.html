@@ -59,8 +59,15 @@
                             <i class="fa-solid fa-circle-user rounded-circle mt-1 text-white fs-1"></i>
                         </div>
                         <div class="col-9 col-md ">
-                            <p class="m-0 text-white Tajawal-Bold">Yousif sailan</p>
+                            <p class="m-0 text-white Tajawal-Bold">{{request.user.username}}</p>
+                            {% if request.user.is_superuser %}
                             <p class="m-0 text-white Tajawal-Bold">Admin</p>
+                            {% elif request.user.is_staff %}
+                            <p class="m-0 text-white Tajawal-Bold">Approver</p>
+                            {% else %}
+                            <p class="m-0 text-white Tajawal-Bold">User</p>
+                            {% endif %}
+                            
                         </div>
                     </div>
                 </div>
@@ -80,7 +87,7 @@
     <!-- Start sidebar -->
     <div class="sidebar d-none d-lg-block pt-4 bg_scoundry_color">
         <!-- start navbar -->
-        {% include 'partials/navbar.html' %}
+        {% include 'report/navbar.html' %}
         <div class="text-center absolute_buttom">
             <a href="{% url 'account:logout' %}" class="btn btn-primary vhr-float">
             <span class="material-symbols-outlined mt-lg-1">
@@ -100,10 +107,10 @@
             
             <form class="row g-3">
                 <div class="col-auto">
-                    <select id="user-filter" class="form-select mb-2" aria-label="Default select example">
-                        <option selected value="0">Shareholders</option>
+                    <select {% if not request.user.is_superuser %} disabled{% endif %} id="user-filter" class="form-select mb-2" aria-label="Default select example">
+                        <option value="0">Shareholders</option>
                         {% for user in users %}
-                        <option value="{{user.id}}">{{user.first_name}}</option>
+                        <option value="{{user.id}}" {% if request.user == user %}selected{% endif %}>{{user.first_name}}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -152,7 +159,7 @@
             </a>
             <hr>
            
-            {% include 'partials/transactions.html' %}
+            {% include 'report/transactions.html' %}
             <!-- Pagination-->
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-center">
