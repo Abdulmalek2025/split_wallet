@@ -69,7 +69,7 @@ def add_request(request):
                     if user.wallet.limit >= object.user_amount and user != request.user:
                         object.approved_list.add(user)
                         object.save()
-                for user in object.users.all():
+                for user in object.approved_list.all():
                     payload = {"head": "Welcome!", "body": f"Hi {user.username}, you have new request","icon":"/static/images/logo.png",'url':reverse(requests),}
                     send_user_notification(user=user, payload=payload, ttl=1000)
             
@@ -234,6 +234,9 @@ def edit_approve(request,id):
             me_request.is_approved = True
             me_request.request_type = 'expense'
             me_request.save()
+            for user in me_request.approved_list.all():
+                payload = {"head": "Welcome!", "body": f"Hi {user.username}, you have new request","icon":"/static/images/logo.png",'url':reverse(requests),}
+                send_user_notification(user=user, payload=payload, ttl=1000) 
             return HttpResponse(
                 json.dumps({"result":True})
             )
