@@ -51,7 +51,7 @@ def add_request(request):
             object = request_form.save(commit=False)
             object.owner = request.user
             object.is_main = True
-            object.request_type = 'expense'
+            object.request_type = 'pending'
             
             object.save()
 
@@ -60,30 +60,34 @@ def add_request(request):
             if object.amount <= request.user.wallet.limit:
                 object.approved_list.add(request.user)
                 object.pay_list.add(request.user)
-                # wallet = Wallet.objects.get(user=request.user)
-                # wallet.available_balance -= request_form.cleaned_data['amount']
-                # wallet.save()
-            object.save()
-            for user in object.users.all():
-                if user.wallet.limit >= object.user_amount and user != request.user:
-                    object.approved_list.add(user)
-                    object.save()
+                wallet = Wallet.objects.get(user=request.user)
+                wallet.available_balance -= request_form.cleaned_data['amount']
+                wallet.save()
+                object.is_pay = True
+                object.save()
+                for user in object.users.all():
+                    if user.wallet.limit >= object.user_amount and user != request.user:
+                        object.approved_list.add(user)
+                        object.save()
+                for user in object.users.all():
+                    payload = {"head": "Welcome!", "body": f"Hi {user.username}, you have new request","icon":"/static/images/logo.png",'url':reverse(requests),}
+                    send_user_notification(user=user, payload=payload, ttl=1000)
+            
             if object.approved_list.all().count() == object.users.all().count():
                 object.is_approved = True
             else:
                 object.is_approved = False
+
                 users = User.objects.filter(is_staff=True)
                 payload = {"head": "Approve!", "body": f"There is a request need to approve","icon":"/static/images/logo.png",'url':reverse(requests),}
                 for user in users:
                     send_user_notification(user=user, payload=payload, ttl=1000)
             object.save()
-            wallet = Wallet.objects.get(user=request.user)
-            wallet.available_balance -= request_form.cleaned_data['amount']
-            wallet.save()
+            # wallet = Wallet.objects.get(user=request.user)
+            # wallet.available_balance -= request_form.cleaned_data['amount']
+            # wallet.save()
 
-            for user in object.users.all():
-                payload = {"head": "Welcome!", "body": f"Hi {user.username}, you have new request","icon":"/static/images/logo.png",'url':reverse(requests),}
-                send_user_notification(user=user, payload=payload, ttl=1000)
+            
             messages.success(request,"New Transaction is added {0}".format(request_form.cleaned_data['category']))
             return HttpResponse(
                 json.dumps({"result":True})
@@ -193,7 +197,6 @@ def pay(request, id):
     sender.save()
     payload = {"head": "New pay!", "body": f"Hi {request.user.username}, you pay {me_request.user_amount} for {me_request.category}","icon":"/static/images/logo.png",'url':reverse(requests),}
     send_user_notification(user=request.user, payload=payload, ttl=1000)
-    PayHistory.objects.create(request=me_request,pay_by=request.user)
     reciever_wallet.available_balance += me_request.user_amount
     reciever_wallet.save()
     reciever = Request.objects.create(amount=me_request.user_amount,owner=me_request.owner,note="{0} recieve from {1}".format(me_request.owner,request.user),category=me_request.category,request_type='income',start_at=datetime.datetime.now(),is_pay=True,is_approved=True)
@@ -218,17 +221,27 @@ def edit_approve(request,id):
     if request.method == "POST":
         me_request = Request.objects.get(id=id)
         form = ApproveForm(request.POST, instance=me_request)
-            
+        
     if form.is_valid():
-        form.save() #you want to set excluded fields
-        # form.save_m2m() #should do this if save(commit=False) used
         if len(form.cleaned_data['users']) == len(form.cleaned_data['approved_list']):
+            
+            form.save() #you want to set excluded fields
+            if not me_request.is_pay:
+                wallet = Wallet.objects.get(user=me_request.owner)
+                wallet.available_balance -= me_request.amount
+                wallet.save()
+                me_request.is_pay = True
             me_request.is_approved = True
+            me_request.request_type = 'expense'
             me_request.save()
-        return HttpResponse(
+            return HttpResponse(
                 json.dumps({"result":True})
-        )
-    
+            )
+        else:
+            return HttpResponse(
+                json.dumps({"error":True})
+            )
+
     return HttpResponse(json.dumps(
             form.errors
             ,ensure_ascii = False)

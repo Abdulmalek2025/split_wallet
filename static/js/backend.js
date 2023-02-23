@@ -443,10 +443,13 @@ $(document).ready(function () {
             processData: false,
             success : function(res) {
                 $("#edit-approve-list-form #error-approve_list").html('')
-                
+                $("#non-form-error").html('')
                 res = JSON.parse(res)
                 if (res.result == true){
                     window.location.reload();
+                }
+                if(res.error == true){
+                    $("#non-form-error").html('<p class="alert alert-danger">You must select all users</p>')
                 }
                 else{
                     
