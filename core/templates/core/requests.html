@@ -17,8 +17,10 @@
                 <td>{{request.created_at}}</td>
                 {% if request.request_type == 'income' %}
                 <td class="text-success">{{request.amount}}</td>
-                {% else %}
+                {% elif request.request_type == 'expense' %}
                 <td class="text-danger">{{request.amount}}</td>
+                {% else %}
+                <td class="">{{request.amount}}</td>
                 {% endif %}
                 
             </tr>

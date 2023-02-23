@@ -37,3 +37,13 @@ class ReversedToAvailableForm(forms.ModelForm):
     class Meta:
         model = Request
         fields = ('category','start_at','amount','attachment','note')
+
+
+class ApproveForm(forms.ModelForm):
+    approved_list = forms.ModelMultipleChoiceField(queryset=User.objects.all(),widget=forms.CheckboxSelectMultiple)
+    users = forms.ModelMultipleChoiceField(queryset=User.objects.all(),widget=forms.CheckboxSelectMultiple)
+    amount = forms.DecimalField(widget=forms.NumberInput(attrs={'class':'form-control','readonly':True}))
+
+    class Meta:
+        model = Request
+        fields = ('id','amount','approved_list','users')

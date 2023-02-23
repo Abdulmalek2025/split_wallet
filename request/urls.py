@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import requests,add_request, add_reversed_income,add_reversed_to_available, review, pay, approve
+from .views import requests,add_request, add_reversed_income,add_reversed_to_available, review, pay, approve, edit_approve
 
 urlpatterns = [
     path('',requests, name='requests'),
@@ -9,4 +9,5 @@ urlpatterns = [
     path('review/<int:id>',review, name='review'),
     path('pay/<int:id>',pay, name='pay'),
     path('approve/<int:id>', approve, name='approve'),
+    path('edit-approve-list/<int:id>/',edit_approve, name="edit_approve"),
 ]

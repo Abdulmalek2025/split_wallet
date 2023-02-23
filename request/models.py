@@ -14,8 +14,9 @@ class Request(models.Model):
     amount = models.DecimalField(decimal_places=2,max_digits=10)
     attachment = models.FileField(upload_to='requests/', blank=True, null=True)
     note = models.CharField(max_length=500,blank=True,null=True)
-    view_list = models.ManyToManyField(User,related_name='views',)
+    approved_list = models.ManyToManyField(User,related_name='approves')
     owner = models.ForeignKey(User,related_name='requests',on_delete=models.PROTECT)
+    is_main = models.BooleanField(default=False)
     request_type = models.CharField(max_length=50,blank=True,null=True,default='expense')
     created_at = models.DateField(auto_now_add=True)
 

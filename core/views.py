@@ -22,7 +22,7 @@ class IndexView(LoginRequiredMixin, ListView):
     context_object_name = 'objects'
 
     def get_queryset(self):
-        return Request.objects.filter(owner=self.request.user).order_by('-id') #here use filter
+        return Request.objects.filter(Q(owner=self.request.user)|Q(category__name="Reserved Income to shareholders")|Q(category__name="Reversed Available to shareholder")).order_by('-id') #here use filter
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)

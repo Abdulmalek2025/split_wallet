@@ -79,8 +79,11 @@ def filter_user(request,user):
     if len(dates) > 0:
         for date in dates:
             lts = [0]* len(header)
-            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-            c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])     
+            if user == 0:       
+                c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            else:
+                c = Request.objects.filter(Q(owner=user),start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
             for c1 in c:
                 for cat in categories:
                     if c1['category__name'] == cat.name:

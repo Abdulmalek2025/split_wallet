@@ -19,9 +19,9 @@
                     <th scope="row">{{request.id}}</th>
                     <td>{{request.category}}</td>
                     <td>{{request.start_at}}</td>
-                    <td>{{request.user_amount}}</td>
+                    <td>{{request.user_amount|floatformat:2}}</td>
                     <td class="text-center text-md-end">
-                    <button type="button" onclick="ap_approve({{request.id}})" class="btn btn-success mb-2 mb-md-0">Approve</button>
+                    <button type="button" onclick="ap_approve({{request.id}})" data-bs-toggle="modal" data-bs-target="#approveModal" class="btn btn-success mb-2 mb-md-0">Approve</button>
                     <button type="button" onclick="ap_review({{request.id}})"  data-bs-toggle="modal" data-bs-target="#newRequest" class="btn btn-primary">Review</button>
                     </td>
                 </tr>
@@ -70,7 +70,31 @@
       contentType: false,
       processData: false,
       success : function(res) {
-          window.location.reload()
+        re = $(res)
+        $("#edit-approve-list-form #id_amount").replaceWith(re[0])
+        $("#edit-approve-list-form #id_approved_list").replaceWith(re[1])
+        $("#edit-approve-list-form #id_users").replaceWith(re[2])
+        $("#edit-approve-list-form #request_id").val(id)
+        users = $(re[2])
+        approve = $(re[1])
+
+        
+        
+        $.each(users.find("input:checkbox:not(:checked)"),function(key,value){
+          if( $("#edit-approve-list-form #id_approved_list input[value="+value.value+"]").length){
+            $("#edit-approve-list-form #id_approved_list input[value="+value.value+"]").parent().addClass('d-none')
+          }
+
+          $.each(approve.find("input:checked"),function(key,value){
+          
+            $("#edit-approve-list-form #id_approved_list input[value="+value.value+"]").prop('readonly',true)
+          })
+          
+          
+          
+        })
+        //console.log(users.find("input")[0])
+        //console.log($("#edit-approve-list-form #id_approved_list input[value=5]").prop('disabled',true))
       },
       // handle a non-successful response
       error : function(xhr,errmsg,err) {
@@ -101,8 +125,6 @@
           $("#id_attachment").prop('disabled',true)
           $("#id_note").replaceWith(re[5])
           $("#id_note").prop('disabled',true)
-
-          console.log(re)
       },
       // handle a non-successful response
       error : function(xhr,errmsg,err) {

@@ -19,7 +19,7 @@
                     <th scope="row">{{request.id}}</th>
                     <td>{{request.category}}</td>
                     <td>{{request.start_at}}</td>
-                    <td>{{request.user_amount}}</td>
+                    <td>{{request.user_amount|floatformat:2}}</td>
                     <td class="text-center text-md-end">
                     <button type="button" onclick="approve({{request.id}})"  class="btn btn-success mb-2 mb-md-0">Approve</button>
                     <button type="button" onclick="review({{request.id}})" data-bs-toggle="modal" data-bs-target="#newRequest" class="btn btn-primary">Review</button>

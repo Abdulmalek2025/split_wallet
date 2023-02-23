@@ -55,7 +55,7 @@ def edit_user(request,id):
     if request.method == 'POST':
      
         user_form = EditForm(request.POST,instance=user)
-        wallet_form = WalletForm(request.POST)
+        wallet_form = WalletForm(request.POST,instance=wallet)
         if user_form.is_valid() and wallet_form.is_valid():
             user.username = user_form.cleaned_data['username']
             user.first_name = user_form.cleaned_data['first_name']

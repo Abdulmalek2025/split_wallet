@@ -431,4 +431,34 @@ $(document).ready(function () {
             }
         });
     })
+    $("#edit-approve-list-form").submit(function(event){
+        event.preventDefault()
+        var formData = new FormData(this);
+        $.ajax({
+            url : "/request/edit-approve-list/"+$("#edit-approve-list-form #request_id").val()+"/", // create institution
+            type : "POST", // http method
+            data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                $("#edit-approve-list-form #error-approve_list").html('')
+                
+                res = JSON.parse(res)
+                if (res.result == true){
+                    window.location.reload();
+                }
+                else{
+                    
+                    for (const [key,value] of Object.entries(res)){
+                        $("#edit-approve-list-form #error-"+key).html(value[0])
+                    }
+                } 
+            },
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+    })
 })

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .forms import RequestForm, ReversedIncomeForm, ReversedToAvailableForm
+from .forms import RequestForm, ReversedIncomeForm, ReversedToAvailableForm, ApproveForm
 from django.contrib import messages
 from core.models import Wallet
 from django.http import HttpResponse
@@ -14,7 +14,7 @@ from webpush import send_user_notification
 # Create your views here.
 
 def requests(request):
-    to_pay = Request.objects.filter((Q(amount__lte=request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[request.user]),users__in=[request.user],is_pay=False)
+    to_pay = Request.objects.filter((Q(approved_list__in=[request.user])) & ~Q(pay_list__in=[request.user]),users__in=[request.user],is_pay=False)
     paginator = Paginator(to_pay,10)
     page = request.GET.get('page1')
     try:
@@ -34,11 +34,12 @@ def requests(request):
     except EmptyPage:
         to_approve = paginator.page(paginator.num_pages)
     request_form = RequestForm()
+    approve_form = ApproveForm()
     if len(to_approve) == 0 and len(to_pay) == 0:
         has_notify = False
     else:
         has_notify = True
-    context = {'to_pay':to_pay, 'to_approve':to_approve,'request_form':request_form,'has_notify':has_notify}  
+    context = {'to_pay':to_pay, 'to_approve':to_approve,'request_form':request_form,'approve_form':approve_form,'has_notify':has_notify}  
     return render(request,'requests.html',context)
 
 
@@ -49,14 +50,32 @@ def add_request(request):
         if request_form.is_valid():
             object = request_form.save(commit=False)
             object.owner = request.user
-            
+            object.is_main = True
             object.request_type = 'expense'
-            if request_form.cleaned_data['amount'] > request.user.wallet.limit:
-                object.is_approved = False
+            
             object.save()
 
             request_form.save_m2m()
-            object.pay_list.add(request.user)
+            
+            if object.amount <= request.user.wallet.limit:
+                object.approved_list.add(request.user)
+                object.pay_list.add(request.user)
+                # wallet = Wallet.objects.get(user=request.user)
+                # wallet.available_balance -= request_form.cleaned_data['amount']
+                # wallet.save()
+            object.save()
+            for user in object.users.all():
+                if user.wallet.limit >= object.user_amount and user != request.user:
+                    object.approved_list.add(user)
+                    object.save()
+            if object.approved_list.all().count() == object.users.all().count():
+                object.is_approved = True
+            else:
+                object.is_approved = False
+                users = User.objects.filter(is_staff=True)
+                payload = {"head": "Approve!", "body": f"There is a request need to approve","icon":"/static/images/logo.png",'url':reverse(requests),}
+                for user in users:
+                    send_user_notification(user=user, payload=payload, ttl=1000)
             object.save()
             wallet = Wallet.objects.get(user=request.user)
             wallet.available_balance -= request_form.cleaned_data['amount']
@@ -85,6 +104,8 @@ def add_reversed_income(request):
             object = request_form.save(commit=False)
             object.owner = request.user
             object.is_pay = True
+            object.is_main = True
+            object.request_type = ''
             object.save()
             users = User.objects.all()
             for user in users:
@@ -120,6 +141,8 @@ def add_reversed_to_available(request):
             object = request_form.save(commit=False)
             object.owner = request.user
             object.is_pay = True
+            object.request_type = ''
+            object.is_main = True
             object.save()
             users = User.objects.all()
             for user in users:
@@ -186,10 +209,27 @@ def pay(request, id):
     return HttpResponse(True)
 
 def approve(request, id):
-    me_request = Request.objects.get(id=id)
-    me_request.is_approved = True
-    me_request.save()
-    for user in me_request.users.all():
-        payload = {"head": "Approved request!","body": f"Hi {user.username}, someone approve a request","icon":"/static/images/logo.png",'url':reverse(requests),}
-        send_user_notification(user=user, payload=payload, ttl=1000)
-    return HttpResponse(True)
+    instance = Request.objects.get(id=id)
+    approve_form = ApproveForm(instance=instance)
+    return HttpResponse(approve_form)
+
+
+def edit_approve(request,id):
+    if request.method == "POST":
+        me_request = Request.objects.get(id=id)
+        form = ApproveForm(request.POST, instance=me_request)
+            
+    if form.is_valid():
+        form.save() #you want to set excluded fields
+        # form.save_m2m() #should do this if save(commit=False) used
+        if len(form.cleaned_data['users']) == len(form.cleaned_data['approved_list']):
+            me_request.is_approved = True
+            me_request.save()
+        return HttpResponse(
+                json.dumps({"result":True})
+        )
+    
+    return HttpResponse(json.dumps(
+            form.errors
+            ,ensure_ascii = False)
+        )

@@ -123,7 +123,7 @@
             </div>
             <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
                 <h4>Emergency Balance</h4>
-                <h2 class="Tajawal-Bold">{{user.wallet.emergency_balance}} SAR</h2>
+                <h2 class="Tajawal-Bold">{{user.wallet.emergency_balance|floatformat:2}} SAR</h2>
 
             </div>
         </div>
@@ -131,12 +131,12 @@
         <div class="row Bill_Details mt-3">
             <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
                 <h4>Income this month</h4>
-                <h2 class="Tajawal-Bold">{% if month_income.amount__sum > 0  %}+{{month_income.amount__sum}}  {% else %}0{% endif %}  SAR</h2>
+                <h2 class="Tajawal-Bold">{% if month_income.amount__sum > 0  %}+{{month_income.amount__sum|floatformat:2}}  {% else %}0{% endif %}  SAR</h2>
 
             </div>
             <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
                 <h4>Expenses this month</h4>
-                <h2 class="Tajawal-Bold">{% if month_expense.amount__sum > 0  %}-{{month_expense.amount__sum}}  {% else %}0{% endif %} SAR</h2>
+                <h2 class="Tajawal-Bold">{% if month_expense.amount__sum > 0  %}-{{month_expense.amount__sum|floatformat:2}}  {% else %}0{% endif %} SAR</h2>
 
             </div>
         </div>
