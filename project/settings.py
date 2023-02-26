@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     'panel',
     'report',
     
-    # 'django_extensions',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
