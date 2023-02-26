@@ -14,11 +14,22 @@
             <tr>
                 <th scope="row">{{user.id}}</th>
                 <td>{{user.first_name}}</td>
+                {% if user.is_superuser %}
+                <td>{{user.wallet.total_percentage}}%</td>
+                <td>{{user.wallet.total_limit}} SR.</td>
+                {% else %}
                 <td>{{user.wallet.share_percentage}}%</td>
                 <td>{{user.wallet.limit}} SR.</td>
+                {% endif %}
+                
                 <td class="text-center text-md-end">
+                    {% if user.is_superuser == False %}
                     <button type="button" onclick="delete_user({{user.id}})" class="btn btn-danger mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#delate_confirm">Delete</button>
                     <button type="button" onclick="edit_user({{user.id}})" class="btn btn-warning mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#editUser">Edit</button>
+                    {% else %}
+                    <button type="button" onclick="edit_admin({{user.id}})" class="btn btn-warning mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#editAdmin">Edit</button>
+                    {% endif %}
+                    
                     <button type="button" onclick="change_password({{user.id}})" class="btn btn-warning mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#passwordUser">Chage password</button>
                 </td>
             </tr>

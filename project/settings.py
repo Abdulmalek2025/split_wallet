@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     #apps
+    
     'webpush',
     'pwa',
     'account',
@@ -45,6 +46,8 @@ INSTALLED_APPS = [
     'request',
     'panel',
     'report',
+    
+    # 'django_extensions',
 ]
 
 MIDDLEWARE = [

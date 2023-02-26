@@ -58,6 +58,7 @@
                         </span>
                         <span>User Limit Amount</span>
                     </label>
+                    
                     {{wallet_form.limit}}
                     <div class="invalid-feedback d-block">
                         <ul class="errorlist">
@@ -73,12 +74,12 @@
                         </span>
                         <span>User Access</span>
                     </label>
-                    <div class="form-check">
+                    {% comment %} <div class="form-check">
                         {{edit_form.is_superuser}}
                         <label class="form-check-label" for="exampleRadios1">
                           Admin
                         </label>
-                      </div>
+                      </div> {% endcomment %}
                       <div class="form-check">
                         {{edit_form.is_staff}}
                         <label class="form-check-label" for="exampleRadios2">

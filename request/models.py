@@ -23,7 +23,18 @@ class Request(models.Model):
 
     @property
     def user_amount(self):
-        return (self.amount / self.users.all().count())
+        if self.is_main==True:
+            return (self.amount / self.users.all().exclude(is_superuser=True).count())
+        else:
+            return self.amount
+    
+    @property
+    def user_share_amount(self):
+        if self.is_main==True:
+            return (self.amount / 100)
+        else:
+            return self.amount
+    
     
 
 

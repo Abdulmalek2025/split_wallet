@@ -4,7 +4,7 @@ from django.contrib.auth.views import (LogoutView,
                                         PasswordResetView,PasswordResetDoneView,
                                         PasswordResetConfirmView,
                                         PasswordResetCompleteView)
-from .views import Login, create_user,edit_user, delete_user,change_password
+from .views import Login, create_user,edit_user, delete_user,change_password,edit_admin
 
 
 app_name = 'account'
@@ -12,6 +12,7 @@ app_name = 'account'
 urlpatterns = [
     path('register/',create_user, name='register'),
     path('edit/<int:id>/',edit_user,name='edit'),
+    path('edit_admin/<int:id>/',edit_admin,name='edit_admin'),
     path('delete/<int:id>/',delete_user, name='delete'),
     path('change_password/<int:id>/', change_password, name="change_password"),
     path('login/',Login.as_view(), name='login'),

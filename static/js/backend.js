@@ -75,6 +75,41 @@ $(document).ready(function () {
         });
 
     })
+
+    $("#edit-admin").submit(function (event) {
+        event.preventDefault()
+        var formData = new FormData(this);
+        $.ajax({
+            url : "/accounts/edit_admin/"+$("#edit-admin #user_id").val()+"/", // create institution
+            type : "POST", // http method
+            data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                res = JSON.parse(res)
+                $("#edit-admin #error-username").html('')
+                $("#edit-admin #error-first_name").html('')
+                if(res.result == true)
+                {
+                    window.location.reload();
+                }
+                else{
+                    for (const [key,value] of Object.entries(res))
+                    {
+                        $("#edit-admin #error-"+key).html(value)
+                    }
+                }    
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+
+    })
+
     $("#change-password-form").submit(function(event){
         event.preventDefault()
         var formData = new FormData(this); 

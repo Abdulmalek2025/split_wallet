@@ -29,18 +29,46 @@ class Wallet(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
+    @property
+    def total_available(self):
+        value = Wallet.objects.all().aggregate(total=Sum('available_balance'))
+        return value['total']
+    
+    @property
+    def total_reverce(self):
+        value = Wallet.objects.all().aggregate(total=Sum('reversed_account'))
+        return value['total']
+    
+    @property
+    def total_emergency(self):
+        value = Wallet.objects.all().aggregate(total=Sum('emergency_balance'))
+        return value['total']
+    
+    @property
+    def total_percentage(self):
+        value = Wallet.objects.all().aggregate(total=Sum('share_percentage'))
+        return value['total']
+    
+    @property
+    def total_limit(self):
+        value = Wallet.objects.all().aggregate(total=Sum('limit'))
+        return value['total']
+    
     def clean(self):
         wallets = Wallet.objects.all()
         print(self.share_percentage)
         if self.pk:
             value = wallets.exclude(pk=self.pk).aggregate(total=Sum('share_percentage'))
-            print("has",value['total'])
-            if value['total']+self.share_percentage > 100:
-                
-                raise ValidationError({'share_percentage':"Use less value"})
+           
+            if value['total'] is not None:
+                print('update')
+                if value['total']+self.share_percentage > 100:
+                    raise ValidationError({'share_percentage':"Use less value"})
+            
         else:
             value = wallets.aggregate(total=Sum('share_percentage'))
-            print(value['total'])
-            if value['total'] + self.share_percentage > 100:
-                raise ValidationError({'share_percentage':"Use less value"})
+            print('create')
+            if value['total'] is not None:
+                if value['total']+self.share_percentage > 100:
+                    raise ValidationError({'share_percentage':"Use less value"})
         super(Wallet, self).clean()

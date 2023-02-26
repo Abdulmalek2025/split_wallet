@@ -5,7 +5,7 @@ from panel.models import Category
 
 class RequestForm(forms.ModelForm):
     category = forms.ModelChoiceField(queryset=Category.objects.all(),widget=forms.Select(attrs={'class':'form-select'}))
-    users = forms.ModelMultipleChoiceField(queryset=User.objects.all(),widget=forms.CheckboxSelectMultiple)
+    users = forms.ModelMultipleChoiceField(queryset=User.objects.all().exclude(is_superuser=True),widget=forms.CheckboxSelectMultiple)
     start_at = forms.DateField(widget=forms.DateInput(attrs={'class':'form-control','type':'date'}))
     amount = forms.DecimalField(widget=forms.NumberInput(attrs={'class':'form-control'}))
     attachment = forms.FileField(required=False,widget=forms.FileInput(attrs={'class':'form-control'}))

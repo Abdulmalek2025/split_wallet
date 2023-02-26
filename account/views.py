@@ -59,12 +59,8 @@ def edit_user(request,id):
         if user_form.is_valid() and wallet_form.is_valid():
             user.username = user_form.cleaned_data['username']
             user.first_name = user_form.cleaned_data['first_name']
-            if user_form.cleaned_data['is_superuser'] == True:
-                user.is_superuser = user_form.cleaned_data['is_superuser']
-                user.is_staff = True
-            else:
-                user.is_superuser = user_form.cleaned_data['is_superuser']
-                user.is_staff = user_form.cleaned_data['is_staff']
+             
+            user.is_staff = user_form.cleaned_data['is_staff']
 
             user.save()
             wallet.share_percentage = wallet_form.cleaned_data['share_percentage']
@@ -84,6 +80,40 @@ def edit_user(request,id):
         {'id':user.id,'username':user.username,'first_name':user.first_name,'limit':wallet.limit,'share_percentage':wallet.share_percentage,'is_superuser':user.is_superuser,'is_staff':user.is_staff},
         ensure_ascii=False,cls= DecimalEncoder
     ))
+
+
+def edit_admin(request,id):
+    try:
+        user = User.objects.get(id = id)
+        
+    except Exception as e: 
+        # messages.error(request, e.message)
+        return redirect('panel')
+    if request.method == 'POST':
+     
+        user_form = EditForm(request.POST,instance=user)
+
+        if user_form.is_valid():
+            user.username = user_form.cleaned_data['username']
+            user.first_name = user_form.cleaned_data['first_name']
+            user.is_staff = True
+
+            user.save()
+
+            messages.success(request,"Update '{0}' user info successfully".format(user_form.cleaned_data['username']))
+            return HttpResponse(
+                json.dumps({"result":True})
+        )
+        
+        return HttpResponse(json.dumps(
+            user_form.errors
+            ,ensure_ascii = False)
+        )
+    return HttpResponse(json.dumps(
+        {'id':user.id,'username':user.username,'first_name':user.first_name},
+        ensure_ascii=False,cls= DecimalEncoder
+    ))
+
 
 def delete_user(request,id):
     user = User.objects.get(id=id)

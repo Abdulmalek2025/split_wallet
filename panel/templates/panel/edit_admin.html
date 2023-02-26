@@ -1,0 +1,80 @@
+<div class="modal fade" id="editAdmin" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog ">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit User</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form action="" method="post" novalidate id="edit-admin">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <input type="hidden" id="user_id" name="user_id" value="">
+                    <label for="username" class="form-label">
+                        <span class="material-symbols-outlined">
+                            person
+                        </span>
+                        <span>Username</span>
+                    </label>
+                    {{edit_form.username}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-username"></li>
+                        </ul>
+                        </div>
+                </div>
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">
+                        <span class="material-symbols-outlined">
+                            person
+                        </span>
+                        <span>Name</span>
+                    </label>
+                    {{edit_form.first_name}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-first_name"></li>
+                        </ul>
+                        </div>
+                    
+                </div>
+                
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary mb-3  hvr-float w-100">Save Change</button>
+                </div>
+                
+            </form>
+        </div>
+        
+    </div>
+    </div>
+</div>
+<script>
+    function edit_admin(id)
+    {
+        $.ajax({
+            url : "/accounts/edit_admin/"+id+"/", // create institution
+            //type : "POST", // http method
+            //data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                res = JSON.parse(res)
+                
+                for (const [key,value] of Object.entries(res))
+                {
+                    $("#edit-admin #id_"+key+':input[type!=checkbox]').val(value)
+                }
+                $("#edit-admin #user_id").val(res.id)
+                   
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+    }
+    
+</script>

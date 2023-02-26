@@ -30,12 +30,12 @@ class EditForm(UserChangeForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
     # password = forms.CharField(widget=forms.PasswordInput(attrs={'class':'form-control'}))
     first_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}))
-    is_superuser = forms.BooleanField(required=False,widget=forms.CheckboxInput(attrs={'class':'form-check-input'}))
+    # is_superuser = forms.BooleanField(required=False,widget=forms.CheckboxInput(attrs={'class':'form-check-input'}))
     is_staff = forms.BooleanField(required=False,widget=forms.CheckboxInput(attrs={'class':'form-check-input'}))
 
     class Meta:
         model = User
-        fields = ('username', 'first_name', 'is_superuser', 'is_staff')
+        fields = ('username', 'first_name', 'is_staff')
 
 
 class SetPasswordForm(SetPasswordForm):

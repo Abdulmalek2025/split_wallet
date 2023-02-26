@@ -14,7 +14,7 @@ from webpush import send_user_notification
 # Create your views here.
 
 def requests(request):
-    to_pay = Request.objects.filter((Q(approved_list__in=[request.user])) & ~Q(pay_list__in=[request.user]),users__in=[request.user],is_pay=False)
+    to_pay = Request.objects.filter((Q(approved_list__in=[request.user])) & ~Q(pay_list__in=[request.user]),users__in=[request.user])
     paginator = Paginator(to_pay,10)
     page = request.GET.get('page1')
     try:
@@ -64,6 +64,7 @@ def add_request(request):
                 wallet.available_balance -= request_form.cleaned_data['amount']
                 wallet.save()
                 object.is_pay = True
+                object.request_type = 'expense'
                 object.save()
                 for user in object.users.all():
                     if user.wallet.limit >= object.user_amount and user != request.user:
@@ -111,18 +112,23 @@ def add_reversed_income(request):
             object.is_main = True
             object.request_type = ''
             object.save()
-            users = User.objects.all()
+            users = User.objects.all().exclude(is_superuser=True)
             for user in users:
                 object.users.add(user)
                 object.save()
             
             # request_form.save_m2m()
-            wallets = Wallet.objects.all()
+            wallets = Wallet.objects.all().exclude(user__is_superuser=True)
             share = request_form.cleaned_data['amount'] / 100
             for wallet in wallets:
                 wallet.reversed_account += (share * wallet.share_percentage)
                 wallet.save()
+                re = Request.objects.create(owner=wallet.user,amount=(share*wallet.share_percentage),is_pay=True,request_type='income',category=object.category,start_at=object.start_at)
+                re.users.add(wallet.user)
+                re.users.add(request.user)
+                re.save()
             for user in object.users.all():
+                
                 payload = {"head": "Welcome!", "body": f"Hi {user.username}, you have new reversed income","icon":"/static/images/logo.png",'url':reverse(requests),}
                 send_user_notification(user=user, payload=payload, ttl=1000)
             messages.success(request,"New Transaction is added {0}".format(request_form.cleaned_data['category']))
@@ -160,6 +166,10 @@ def add_reversed_to_available(request):
                 wallet.available_balance += (share * wallet.share_percentage) - (((share * wallet.share_percentage)/100)*10)
                 wallet.emergency_balance += (((share * wallet.share_percentage)/100)*10)
                 wallet.save()
+                re = Request.objects.create(owner=wallet.user,amount=(share*wallet.share_percentage),is_pay=True,request_type='income',category=object.category,start_at=object.start_at)
+                re.users.add(wallet.user)
+                re.users.add(request.user)
+                re.save()
             for user in object.users.all():
                 payload = {"head": "Welcome!", "body": f"Hi {user.username}, you have new available balance","icon":"/static/images/logo.png",'url':reverse(requests),}
                 send_user_notification(user=user, payload=payload, ttl=1000)

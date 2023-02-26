@@ -22,7 +22,9 @@ class IndexView(LoginRequiredMixin, ListView):
     context_object_name = 'objects'
 
     def get_queryset(self):
-        return Request.objects.filter(Q(owner=self.request.user)|Q(category__name="Reserved Income to shareholders")|Q(category__name="Reversed Available to shareholder")).order_by('-id') #here use filter
+        if self.request.user.is_superuser:
+            return Request.objects.filter(Q(owner=self.request.user)).order_by('-id') #here use filter
+        return Request.objects.filter(Q(owner=self.request.user)).order_by('-id')
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
@@ -35,8 +37,12 @@ class IndexView(LoginRequiredMixin, ListView):
         expense, ex_created = Category.objects.get_or_create(name='Reversed Available to shareholder',visible=False)
         context['reversed_to_available_form'].fields['category'].queryset = Category.objects.filter(name="Reversed Available to shareholder")
         today = datetime.datetime.now()
-        context['month_income'] =  Request.objects.filter(start_at__month=today.month, request_type='income',owner=self.request.user).aggregate(Sum('amount'))
-        context['month_expense'] = Request.objects.filter(start_at__month=today.month, request_type='expense',owner=self.request.user).aggregate(Sum('amount'))
+        if self.request.user.is_superuser:
+            context['month_income'] =  Request.objects.filter(start_at__month=today.month, request_type='income').aggregate(Sum('amount'))
+            context['month_expense'] = Request.objects.filter(start_at__month=today.month, request_type='expense').aggregate(Sum('amount'))
+        else:
+            context['month_income'] =  Request.objects.filter(start_at__month=today.month, request_type='income',owner=self.request.user).aggregate(Sum('amount'))
+            context['month_expense'] = Request.objects.filter(start_at__month=today.month, request_type='expense',owner=self.request.user).aggregate(Sum('amount'))
         context['wallet'] = Wallet.objects.get(user=self.request.user)
         to_pay = Request.objects.filter((Q(amount__lte=self.request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[self.request.user]),users__in=[self.request.user],is_pay=False)
         to_approve = Request.objects.filter(is_approved=False)

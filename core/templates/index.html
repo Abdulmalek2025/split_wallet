@@ -1,6 +1,7 @@
 {% load static %}
 {% load pwa %}
 {% load webpush_notifications %}
+{% load multiple %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -84,12 +85,15 @@
     
         <!-- Top buttons-->
         <div class=" text-center text-lg-start">
+            {% if  user.is_superuser == False %}
             <button type="button" class="btn btn-primary vhr-float mb-2" data-bs-toggle="modal" data-bs-target="#newRequest">
                 <span class="material-symbols-outlined mt-lg-1">
                     add
                 </span>
                 New Request
             </button>
+            {% endif %}
+            
             {% if user.is_superuser %}
             <button type="button" class="btn btn-primary vhr-float mx-md-2 mb-2" data-bs-toggle="modal" data-bs-target="#reservedIncome">
                 <span class="material-symbols-outlined mt-lg-1">
@@ -97,9 +101,6 @@
                 </span>
                 New Reserved Income
             </button>
-            {% endif %}
-            
-            {% if user.is_superuser %}
             <button type="button" class="btn btn-primary vhr-float mb-2" data-bs-toggle="modal" data-bs-target="#Reserved_to_Available">
                 <span class="material-symbols-outlined mt-lg-1">
                     add
@@ -113,17 +114,32 @@
         <div class="row Bill_Details mt-3">
             <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
                 <h4>Available Balance</h4>
-                <h2 class="Tajawal-Bold">{{user.wallet.available_balance}} SAR</h2>
+                {% if request.user.is_superuser %}
+                <h2 class="Tajawal-Bold">{{user.wallet.total_available|floatformat:2}} SAR</h2>
+                {% else %}
+                <h2 class="Tajawal-Bold">{{user.wallet.available_balance|floatformat:2}} SAR</h2>
+                {% endif %}
+                
 
             </div>
             <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
                 <h4>Reserved Account</h4>
-                <h2 class="Tajawal-Bold">{{user.wallet.reversed_account}} SAR</h2>
+                {% if request.user.is_superuser %}
+                <h2 class="Tajawal-Bold">{{user.wallet.total_reverce|floatformat:2}} SAR</h2>
+                {% else %}
+                <h2 class="Tajawal-Bold">{{user.wallet.reversed_account|floatformat:2}} SAR</h2>
+                {% endif %}
+                
 
             </div>
             <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
                 <h4>Emergency Balance</h4>
+                {% if request.user.is_superuser %}
+                <h2 class="Tajawal-Bold">{{user.wallet.total_emergency|floatformat:2}} SAR</h2>
+                {% else %}
                 <h2 class="Tajawal-Bold">{{user.wallet.emergency_balance|floatformat:2}} SAR</h2>
+                {% endif %}
+                
 
             </div>
         </div>
