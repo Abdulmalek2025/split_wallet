@@ -60,6 +60,13 @@ class ReportView(LoginRequiredMixin,ListView):
             has_notify = False
         else:
             has_notify = True
+        
+        if len(to_pay) == 0:
+            has_note = False
+        else:
+            has_note = True
+
+        context['has_note'] = has_note
         context['has_notify'] = has_notify
         return context
 

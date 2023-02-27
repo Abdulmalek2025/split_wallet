@@ -22,14 +22,14 @@
                 <td class="text-danger">{{object.amount}}</td>
                 {% else %}
                 {% if request.user.is_superuser %}
-                {% if object.category.name == 'Reserved Income to shareholders' or object.category.name == 'Reversed Available to shareholder' %}
+                    {% if object.category.name == 'Reserved Income to shareholders' or object.category.name == 'Reversed Available to shareholder' %}
                     <td class="">{{object.amount}}</td>
                     {% else %}
                     <td class="">{{object.amount}}</td>
                     {% endif %}
                 {% else %}
                 {% if object.category.name == 'Reserved Income to shareholders' or object.category.name == 'Reversed Available to shareholder' %}
-                    <td class="">{{object.user_share_amount|multi:request.user.wallet.share_percentage}}</td>
+                    <td class="">{{object.amount}}</td>
                     {% else %}
                     <td class="">{{object.user_amount}}</td>
                     {% endif %}

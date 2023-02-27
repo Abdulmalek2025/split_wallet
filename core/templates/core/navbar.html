@@ -14,9 +14,16 @@
                     import_contacts
                 </span>
                 <span class="big_menu">Requests</span>
-                {% if has_notify %}
-                <div class="pulse"></div> 
-                {% endif %} 
+                {% if request.user.is_staff %}
+                    {% if has_notify %}
+                    <div class="pulse"></div> 
+                    {% endif %}
+                {% else %}
+                    {% if has_note %}
+                    <div class="pulse"></div> 
+                    {% endif %} 
+                {% endif %}
+                
                 
             </a>
         </li>

@@ -23,8 +23,8 @@ class IndexView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         if self.request.user.is_superuser:
-            return Request.objects.filter(Q(owner=self.request.user)).order_by('-id') #here use filter
-        return Request.objects.filter(Q(owner=self.request.user)).order_by('-id')
+            return Request.objects.filter(Q(owner=self.request.user) & ~Q(request_type='pending')).order_by('-id') #here use filter
+        return Request.objects.filter(Q(owner=self.request.user)& ~Q(request_type='pending')).order_by('-id')
 
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
@@ -50,6 +50,12 @@ class IndexView(LoginRequiredMixin, ListView):
             has_notify = False
         else:
             has_notify = True
+
+        if len(to_pay) == 0:
+            has_note = False
+        else:
+            has_note = True
+        context['has_note'] = has_note
         context['has_notify'] = has_notify
         return context
     

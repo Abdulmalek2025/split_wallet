@@ -39,7 +39,11 @@ def requests(request):
         has_notify = False
     else:
         has_notify = True
-    context = {'to_pay':to_pay, 'to_approve':to_approve,'request_form':request_form,'approve_form':approve_form,'has_notify':has_notify}  
+    if len(to_pay) == 0:
+        has_note = False
+    else:
+        has_note = True
+    context = {'to_pay':to_pay, 'to_approve':to_approve,'request_form':request_form,'approve_form':approve_form,'has_notify':has_notify,'has_note':has_note}  
     return render(request,'requests.html',context)
 
 
@@ -57,7 +61,7 @@ def add_request(request):
 
             request_form.save_m2m()
             
-            if object.amount <= request.user.wallet.limit:
+            if object.user_amount <= request.user.wallet.limit:
                 object.approved_list.add(request.user)
                 object.pay_list.add(request.user)
                 wallet = Wallet.objects.get(user=request.user)
@@ -122,8 +126,9 @@ def add_reversed_income(request):
             share = request_form.cleaned_data['amount'] / 100
             for wallet in wallets:
                 wallet.reversed_account += (share * wallet.share_percentage)
+                amount = (share * wallet.share_percentage)
                 wallet.save()
-                re = Request.objects.create(owner=wallet.user,amount=(share*wallet.share_percentage),is_pay=True,request_type='income',category=object.category,start_at=object.start_at)
+                re = Request.objects.create(owner=wallet.user,amount=amount,is_pay=True,request_type='',category=object.category,start_at=object.start_at)
                 re.users.add(wallet.user)
                 re.users.add(request.user)
                 re.save()
@@ -159,14 +164,14 @@ def add_reversed_to_available(request):
                 object.users.add(user)
                 object.save()
             # divide the amount to all users based on thier percentage
-            wallets = Wallet.objects.all()
+            wallets = Wallet.objects.all().exclude(user__is_superuser=True)
             share = request_form.cleaned_data['amount'] / 100
             for wallet in wallets:
                 wallet.reversed_account -= (share * wallet.share_percentage)
                 wallet.available_balance += (share * wallet.share_percentage) - (((share * wallet.share_percentage)/100)*10)
                 wallet.emergency_balance += (((share * wallet.share_percentage)/100)*10)
                 wallet.save()
-                re = Request.objects.create(owner=wallet.user,amount=(share*wallet.share_percentage),is_pay=True,request_type='income',category=object.category,start_at=object.start_at)
+                re = Request.objects.create(owner=wallet.user,amount=(share*wallet.share_percentage),is_pay=True,request_type='',category=object.category,start_at=object.start_at)
                 re.users.add(wallet.user)
                 re.users.add(request.user)
                 re.save()
