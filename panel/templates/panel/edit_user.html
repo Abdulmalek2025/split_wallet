@@ -68,6 +68,22 @@
                 </div>
 
                 <div class="mb-3">
+                    <label for="Participants" class="form-label">
+                        <span class="material-symbols-outlined">
+                            drag_indicator
+                        </span>
+                        <span>Approved categories</span>
+                    </label>
+                    {{wallet_form.category_list}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-category_list"></li>
+                        </ul>
+                    </div>
+                </div>
+
+
+                <div class="mb-3">
                     <label for="UserLimitAmount" class="form-label">
                         <span class="material-symbols-outlined">
                             bolt
@@ -116,14 +132,15 @@
             contentType: false,
             processData: false,
             success : function(res) {
-                res = JSON.parse(res)
-                for (const [key,value] of Object.entries(res))
-                {
-                    $("#edit-user #id_"+key+':input[type!=checkbox]').val(value)
-                }
-                $("#user_id").val(res.id)
-                $("#edit-user #id_is_staff").prop('checked',res.is_staff)
-                $("#edit-user #id_is_superuser").prop('checked',res.is_superuser)        
+                res = $(res)
+                $("#edit-user #id_username").replaceWith($(res[0].innerHTML)[2].innerHTML)
+                $("#edit-user #id_first_name").replaceWith($(res[2].innerHTML)[2].innerHTML)
+                $("#edit-user #id_is_staff").replaceWith($(res[4].innerHTML)[2].innerHTML)
+                $("#edit-user #id_share_percentage").replaceWith($(res[11].innerHTML)[2].innerHTML)
+                $("#edit-user #id_limit").replaceWith($(res[13].innerHTML)[2].innerHTML)
+                $("#edit-user #id_category_list").replaceWith($(res[15].innerHTML)[2].innerHTML)
+                $("#edit-user #user_id").replaceWith($(res[16]))
+                      
             },
 
             // handle a non-successful response

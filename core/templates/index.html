@@ -2,6 +2,7 @@
 {% load pwa %}
 {% load webpush_notifications %}
 {% load multiple %}
+{% load humanize %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -107,37 +108,43 @@
                 </span>
                 Reserved to Available  
             </button>
+            <button type="button" class="btn btn-primary vhr-float mb-2" data-bs-toggle="modal" data-bs-target="#Emergency_to_Available">
+                <span class="material-symbols-outlined mt-lg-1">
+                    add
+                </span>
+                Emergency to Available  
+            </button>
             {% endif %}
             
         </div>
         <!-- The Bill Details-->
-        <div class="row Bill_Details mt-3">
-            <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
+        <div class="row Bill_Details mt-3" >
+            <div class="col-12 col-md mb-2  py-4 text-center" style="background:#A9CCE3">
                 <h4>Available Balance</h4>
                 {% if request.user.is_superuser %}
-                <h2 class="Tajawal-Bold">{{user.wallet.total_available|floatformat:2}} SAR</h2>
+                <h2 class="Tajawal-Bold">{{user.wallet.total_available|floatformat:2|intcomma}} SAR</h2>
                 {% else %}
-                <h2 class="Tajawal-Bold">{{user.wallet.available_balance|floatformat:2}} SAR</h2>
+                <h2 class="Tajawal-Bold">{{user.wallet.available_balance|floatformat:2|intcomma}} SAR</h2>
                 {% endif %}
                 
 
             </div>
-            <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
+            <div class="col-12 col-md mb-2 py-4 text-center" style="background:#F5B041">
                 <h4>Reserved Account</h4>
                 {% if request.user.is_superuser %}
-                <h2 class="Tajawal-Bold">{{user.wallet.total_reverce|floatformat:2}} SAR</h2>
+                <h2 class="Tajawal-Bold">{{user.wallet.total_reverce|floatformat:2|intcomma}} SAR</h2>
                 {% else %}
-                <h2 class="Tajawal-Bold">{{user.wallet.reversed_account|floatformat:2}} SAR</h2>
+                <h2 class="Tajawal-Bold">{{user.wallet.reversed_account|floatformat:2|intcomma}} SAR</h2>
                 {% endif %}
                 
 
             </div>
-            <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
+            <div class="col-12 col-md mb-2 py-4 text-center" style="background:#AEB6BF">
                 <h4>Emergency Balance</h4>
                 {% if request.user.is_superuser %}
-                <h2 class="Tajawal-Bold">{{user.wallet.total_emergency|floatformat:2}} SAR</h2>
+                <h2 class="Tajawal-Bold">{{user.wallet.total_emergency|floatformat:2|intcomma}} SAR</h2>
                 {% else %}
-                <h2 class="Tajawal-Bold">{{user.wallet.emergency_balance|floatformat:2}} SAR</h2>
+                <h2 class="Tajawal-Bold">{{user.wallet.emergency_balance|floatformat:2|intcomma}} SAR</h2>
                 {% endif %}
                 
 
@@ -147,12 +154,12 @@
         <div class="row Bill_Details mt-3">
             <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
                 <h4>Income this month</h4>
-                <h2 class="Tajawal-Bold">{% if month_income.amount__sum > 0  %}+{{month_income.amount__sum|floatformat:2}}  {% else %}0{% endif %}  SAR</h2>
+                <h2 class="Tajawal-Bold">{% if month_income.amount__sum > 0  %}+{{month_income.amount__sum|floatformat:2|intcomma}}  {% else %}0{% endif %}  SAR</h2>
 
             </div>
             <div class="col-12 col-md mb-2 bg_scoundary_color py-4 text-center">
                 <h4>Expenses this month</h4>
-                <h2 class="Tajawal-Bold">{% if month_expense.amount__sum > 0  %}-{{month_expense.amount__sum|floatformat:2}}  {% else %}0{% endif %} SAR</h2>
+                <h2 class="Tajawal-Bold">{% if month_expense.amount__sum > 0  %}-{{month_expense.amount__sum|floatformat:2|intcomma}}  {% else %}0{% endif %} SAR</h2>
 
             </div>
         </div>
@@ -221,7 +228,8 @@
 
     <!--Add Reserved to Available Modal -->
     {% include 'core/new_available.html' %}
-    
+    {% comment %} Emergency_to_Available {% endcomment %}
+    {% include 'core/emergency.html' %}
 
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>

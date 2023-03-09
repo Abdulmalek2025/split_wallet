@@ -5,7 +5,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from panel.models import Category
 from core.models import Wallet
 from request.models import Request
-from request.forms import RequestForm,ReversedIncomeForm, ReversedToAvailableForm
+from request.forms import RequestForm,ReversedIncomeForm, ReversedToAvailableForm,EmergencyToAvailableForm
 from django.contrib import messages
 import json
 import datetime
@@ -36,6 +36,9 @@ class IndexView(LoginRequiredMixin, ListView):
         context['reversed_to_available_form'] = ReversedToAvailableForm()
         expense, ex_created = Category.objects.get_or_create(name='Reversed Available to shareholder',visible=False)
         context['reversed_to_available_form'].fields['category'].queryset = Category.objects.filter(name="Reversed Available to shareholder")
+        emergency, em_created = Category.objects.get_or_create(name='Emergency to available',visible=False)
+        context['emergency_form'] = EmergencyToAvailableForm()
+        context['emergency_form'].fields['category'].queryset = Category.objects.filter(name="Emergency to available")
         today = datetime.datetime.now()
         if self.request.user.is_superuser:
             context['month_income'] =  Request.objects.filter(start_at__month=today.month, request_type='income').aggregate(Sum('amount'))

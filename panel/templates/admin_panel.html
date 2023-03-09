@@ -88,6 +88,36 @@
     <!-- Start body -->
     <div class="body py-4 px-2 px-lg-4">
 
+        <div class="p-3 bg_scoundary_color mt-1">
+            <h4 class="Tajawal-Bold">Users</h4>
+            <hr>
+            {% include 'panel/transactions.html' %}
+            <!-- Pagination-->
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                {% if objects.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page3={{ objects.previous_page_number }}" aria-label="Previous">
+                      <span aria-hidden="true">&laquo;</span>
+                    </a>
+                  </li>
+                {% endif %}
+                  
+                {% for object in objects.paginator.page_range %}
+                <li class="page-item"><a class="page-link" href="?page3={{ forloop.counter }}">{{ forloop.counter }}</a></li>
+            {% endfor %} 
+                  {% if objects.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page3={{ objects.next_page_number }}" aria-label="Next">
+                      <span aria-hidden="true">&raquo;</span>
+                    </a>
+                  </li>
+                  {% endif %}
+                  
+                </ul>
+              </nav>
+        </div>
+
         <!-- Add new User button-->
         <button type="button" class="btn btn-primary vhr-float mb-2" data-bs-toggle="modal" data-bs-target="#addNewUser">
             <span class="material-symbols-outlined mt-lg-1">
@@ -164,6 +194,13 @@
                 </ul>
               </nav>
         </div>
+        <div class="p-3 bg_scoundary_color mt-3">
+            <h4 class="Tajawal-Bold">Emergency Account Adjudgement</h4>
+            <hr>
+            {% include 'panel/emergency_per.html' %}
+            <!-- Pagination-->
+            
+        </div>
     </div>
     <!-- End body -->
 
@@ -190,6 +227,7 @@
     {% include 'panel/edit_category.html' %}
     {% include 'panel/delete_confirm_category.html' %}
     {% include 'panel/edit_admin.html' %}
+    {% include 'panel/edit_emergency.html' %}
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>

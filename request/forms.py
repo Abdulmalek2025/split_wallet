@@ -38,6 +38,17 @@ class ReversedToAvailableForm(forms.ModelForm):
         model = Request
         fields = ('category','start_at','amount','attachment','note')
 
+class EmergencyToAvailableForm(forms.ModelForm):
+    category = forms.ModelChoiceField(queryset=Category.objects.all(),widget=forms.Select(attrs={'class':'form-select'}),empty_label=None)
+    start_at = forms.DateField(widget=forms.DateInput(attrs={'class':'form-control','type':'date'}))
+    amount = forms.DecimalField(widget=forms.NumberInput(attrs={'class':'form-control'}))
+    attachment = forms.FileField(required=False,widget=forms.FileInput(attrs={'class':'form-control'}))
+    note = forms.CharField(required=False, widget=forms.Textarea(attrs={'class':'form-control'}))
+
+    class Meta:
+        model = Request
+        fields = ('category','start_at','amount','attachment','note')
+
 
 class ApproveForm(forms.ModelForm):
     approved_list = forms.ModelMultipleChoiceField(queryset=User.objects.all(),widget=forms.CheckboxSelectMultiple)
@@ -47,3 +58,5 @@ class ApproveForm(forms.ModelForm):
     class Meta:
         model = Request
         fields = ('id','amount','approved_list','users')
+
+

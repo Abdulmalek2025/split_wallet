@@ -78,6 +78,9 @@
                         </ul>
                         </div>
                 </div>
+
+                
+
                 <div class="mb-3">
                     <label for="UserLimitAmount" class="form-label">
                         <span class="material-symbols-outlined">
@@ -91,6 +94,21 @@
                             <li id="error-limit"></li>
                         </ul>
                         </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="Participants" class="form-label">
+                        <span class="material-symbols-outlined">
+                            drag_indicator
+                        </span>
+                        <span>Approved categories</span>
+                    </label>
+                    {{wallet_form.category_list}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-category_list"></li>
+                        </ul>
+                    </div>
                 </div>
 
                 <div class="mb-3">

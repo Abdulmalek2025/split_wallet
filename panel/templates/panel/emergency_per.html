@@ -1,0 +1,24 @@
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+            <th scope="col">#</th>
+            <th scope="col">Emergency Account %</th>
+            <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            
+            <tr>
+                <th scope="row">1</th>
+                <td>{{emergency.emergency_percentage}} %</td>
+                <td class="text-center text-md-end">
+                    {% comment %} <button type="button" onclick="delete_category({{category.id}})" class="btn btn-danger mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#delete-confirm-category">Delete</button> {% endcomment %}
+                    <button type="button" onclick="edit_emergency()" class="btn btn-warning mb-2 mb-md-0" data-bs-toggle="modal" data-bs-target="#editEmergency">Edit</button>
+                </td>
+            </tr>
+            
+            
+        </tbody>
+    </table>
+</div>

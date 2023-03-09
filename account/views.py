@@ -32,7 +32,11 @@ def create_user(request):
         wallet_form = WalletForm(request.POST)
         if signup_form.is_valid() and wallet_form.is_valid():
             user = signup_form.save()
-            Wallet.objects.create(limit=wallet_form.cleaned_data['limit'],share_percentage=wallet_form.cleaned_data['share_percentage'],user=user)
+            wallet = wallet_form.save(commit=False)
+            wallet.user = user
+            wallet.save()
+            wallet.save_m2m()
+            # Wallet.objects.create(limit=wallet_form.cleaned_data['limit'],share_percentage=wallet_form.cleaned_data['share_percentage'],user=user)
             messages.success(request,"New user is added successfully '{0}'".format(signup_form.cleaned_data['username']))
             return HttpResponse(
                 json.dumps({"result":True})
@@ -49,6 +53,8 @@ def edit_user(request,id):
     try:
         user = User.objects.get(id = id)
         wallet = Wallet.objects.get(user=user)
+        user_form = EditForm(instance=user)
+        wallet_form = WalletForm(instance=wallet)
     except Exception as e: 
         # messages.error(request, e.message)
         return redirect('panel')
@@ -65,6 +71,7 @@ def edit_user(request,id):
             user.save()
             wallet.share_percentage = wallet_form.cleaned_data['share_percentage']
             wallet.limit = wallet_form.cleaned_data['limit']
+            wallet.category_list.set(wallet_form.cleaned_data['category_list'])
             wallet.save()
 
             messages.success(request,"Update '{0}' user info successfully".format(user_form.cleaned_data['username']))
@@ -76,10 +83,8 @@ def edit_user(request,id):
             errors
             ,ensure_ascii = False)
         )
-    return HttpResponse(json.dumps(
-        {'id':user.id,'username':user.username,'first_name':user.first_name,'limit':wallet.limit,'share_percentage':wallet.share_percentage,'is_superuser':user.is_superuser,'is_staff':user.is_staff},
-        ensure_ascii=False,cls= DecimalEncoder
-    ))
+    id_input = '<input type="hidden" id="user_id" name="user_id" value="'+str(id)+'">'
+    return HttpResponse([user_form,wallet_form,id_input])
 
 
 def edit_admin(request,id):

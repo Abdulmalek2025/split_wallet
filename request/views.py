@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .forms import RequestForm, ReversedIncomeForm, ReversedToAvailableForm, ApproveForm
+from .forms import RequestForm, ReversedIncomeForm, ReversedToAvailableForm, ApproveForm,EmergencyToAvailableForm
 from django.contrib import messages
 from core.models import Wallet
 from django.http import HttpResponse
@@ -14,7 +14,7 @@ from webpush import send_user_notification
 # Create your views here.
 
 def requests(request):
-    to_pay = Request.objects.filter((Q(approved_list__in=[request.user])) & ~Q(pay_list__in=[request.user]),users__in=[request.user])
+    to_pay = Request.objects.filter((Q(approved_list__in=[request.user])) & ~Q(pay_list__in=[request.user]) & Q(request_type='expense'),users__in=[request.user])
     paginator = Paginator(to_pay,10)
     page = request.GET.get('page1')
     try:
@@ -55,23 +55,23 @@ def add_request(request):
             object = request_form.save(commit=False)
             object.owner = request.user
             object.is_main = True
-            object.request_type = 'pending'
+            object.request_type = 'Not approved'
             
             object.save()
 
             request_form.save_m2m()
             
-            if object.user_amount <= request.user.wallet.limit:
+            if object.user_amount <= request.user.wallet.limit and object.category in request.user.wallet.category_list.all():
                 object.approved_list.add(request.user)
-                object.pay_list.add(request.user)
-                wallet = Wallet.objects.get(user=request.user)
-                wallet.available_balance -= request_form.cleaned_data['amount']
-                wallet.save()
-                object.is_pay = True
-                object.request_type = 'expense'
+                # object.pay_list.add(request.user)
+                # wallet = Wallet.objects.get(user=request.user)
+                # wallet.available_balance -= request_form.cleaned_data['amount']
+                # wallet.save()
+                # object.is_pay = True
+                
                 object.save()
                 for user in object.users.all():
-                    if user.wallet.limit >= object.user_amount and user != request.user:
+                    if user.wallet.limit >= object.user_amount and user != request.user and object.category in request.user.wallet.category_list.all():
                         object.approved_list.add(user)
                         object.save()
                 for user in object.approved_list.all():
@@ -80,6 +80,7 @@ def add_request(request):
             
             if object.approved_list.all().count() == object.users.all().count():
                 object.is_approved = True
+                object.request_type = 'Pending'
             else:
                 object.is_approved = False
 
@@ -93,7 +94,6 @@ def add_request(request):
             # wallet.save()
 
             
-            messages.success(request,"New Transaction is added {0}".format(request_form.cleaned_data['category']))
             return HttpResponse(
                 json.dumps({"result":True})
         )
@@ -168,8 +168,50 @@ def add_reversed_to_available(request):
             share = request_form.cleaned_data['amount'] / 100
             for wallet in wallets:
                 wallet.reversed_account -= (share * wallet.share_percentage)
-                wallet.available_balance += (share * wallet.share_percentage) - (((share * wallet.share_percentage)/100)*10)
-                wallet.emergency_balance += (((share * wallet.share_percentage)/100)*10)
+                wallet.available_balance += (share * wallet.share_percentage) - (((share * wallet.share_percentage)/100)*wallet.emergency_percentage)
+                wallet.emergency_balance += (((share * wallet.share_percentage)/100)*wallet.emergency_percentage)
+                wallet.save()
+                re = Request.objects.create(owner=wallet.user,amount=(share*wallet.share_percentage),is_pay=True,request_type='',category=object.category,start_at=object.start_at)
+                re.users.add(wallet.user)
+                re.users.add(request.user)
+                re.save()
+            for user in object.users.all():
+                payload = {"head": "Welcome!", "body": f"Hi {user.username}, you have new available balance","icon":"/static/images/logo.png",'url':reverse(requests),}
+                send_user_notification(user=user, payload=payload, ttl=1000)
+            # wallet = Wallet
+            messages.success(request,"New Transaction is added {0}".format(request_form.cleaned_data['category']))
+            return HttpResponse(
+                json.dumps({"result":True})
+        )
+
+        return HttpResponse(json.dumps(
+            request_form.errors
+            ,ensure_ascii = False)
+        )
+    return HttpResponse(json.dumps({"result":True}))
+
+def add_emergency_to_available(request):
+    if request.method == "POST":
+        request_form = EmergencyToAvailableForm(request.POST,request.FILES)
+
+        if request_form.is_valid():
+            object = request_form.save(commit=False)
+            object.owner = request.user
+            object.is_pay = True
+            object.request_type = ''
+            object.is_main = True
+            object.save()
+            users = User.objects.all().exclude(is_superuser=True)
+            for user in users:
+                object.users.add(user)
+                object.save()
+            # divide the amount to all users based on thier percentage
+            wallets = Wallet.objects.all().exclude(user__is_superuser=True)
+            share = request_form.cleaned_data['amount'] / 100
+            for wallet in wallets:
+                wallet.emergency_balance -= (share * wallet.share_percentage)
+                wallet.available_balance += (share * wallet.share_percentage)
+                # wallet.emergency_balance += (((share * wallet.share_percentage)/100)*wallet.emergency_percentage)
                 wallet.save()
                 re = Request.objects.create(owner=wallet.user,amount=(share*wallet.share_percentage),is_pay=True,request_type='',category=object.category,start_at=object.start_at)
                 re.users.add(wallet.user)
@@ -241,17 +283,16 @@ def edit_approve(request,id):
         if len(form.cleaned_data['users']) == len(form.cleaned_data['approved_list']):
             
             form.save() #you want to set excluded fields
-            if not me_request.is_pay:
-                wallet = Wallet.objects.get(user=me_request.owner)
-                wallet.available_balance -= me_request.amount
-                wallet.save()
-                me_request.is_pay = True
+            # if not me_request.is_pay:
+                # wallet = Wallet.objects.get(user=me_request.owner)
+                # wallet.available_balance -= me_request.amount
+                # wallet.save()
+                # me_request.is_pay = True
             me_request.is_approved = True
-            me_request.request_type = 'expense'
+            me_request.request_type = 'Pending'
             me_request.save()
-            for user in me_request.approved_list.all():
-                payload = {"head": "Welcome!", "body": f"Hi {user.username}, you have new request","icon":"/static/images/logo.png",'url':reverse(requests),}
-                send_user_notification(user=user, payload=payload, ttl=1000) 
+            payload = {"head": "Welcome!", "body": f"New you have new request to complete","icon":"/static/images/logo.png",'url':reverse(requests),}
+            send_user_notification(user=User.objects.get(is_superuser=True), payload=payload, ttl=1000) 
             return HttpResponse(
                 json.dumps({"result":True})
             )
@@ -264,3 +305,15 @@ def edit_approve(request,id):
             form.errors
             ,ensure_ascii = False)
         )
+
+
+def complete(request,id):
+    object = Request.objects.get(id=id)
+    object.request_type = 'expense'
+    object.is_pay = True
+    object.pay_list.add(object.owner)
+    object.save()
+    wallet = Wallet.objects.get(user=object.owner)
+    wallet.available_balance -= object.amount
+    wallet.save()    
+    return HttpResponse({'result':True})

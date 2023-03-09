@@ -214,6 +214,41 @@ $(document).ready(function () {
 
     })
 
+    $("#edit-emergency-form").submit(function (event) {
+        event.preventDefault()
+        var formData = new FormData(this);
+        $.ajax({
+            url : "/panel/edit-emergency/", // create institution
+            type : "POST", // http method
+            data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                res = JSON.parse(res)
+                $("#edit-emergency-form #error-emergency_percentage").html('')
+                if(res.result == true)
+                {
+                    window.location.reload();
+                }
+                
+                else{
+                    
+                    for (const [key,value] of Object.entries(res))
+                    {
+                        console.log(value)
+                        $("#edit-emergency-form #error-"+key).html(value)
+                    }
+                }    
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+
+    })
     $("#add-request-form").submit(function (event) {
         event.preventDefault()
         var formData = new FormData(this);
@@ -319,6 +354,41 @@ $(document).ready(function () {
         });
 
     })
+    // add-emergency-to-available-form
+    $("#add-emergency-to-available-form").submit(function (event) {
+        event.preventDefault()
+        var formData = new FormData(this);
+        $.ajax({
+            url : "/request/add-emergency-to-available/", // create institution
+            type : "POST", // http method
+            data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                $("#add-emergency-to-available-form #error-category").html('')
+                $("#add-emergency-to-available-form #error-start_at").html('')
+                $("#add-emergency-to-available-form #error-amount").html('')
+                $("#add-emergency-to-available-form #error-attachment").html('')
+                $("#add-emergency-to-available-form #error-note").html('')
+                res = JSON.parse(res)
+                if (res.result == true){
+                    window.location.reload();
+                }
+                else{
+                    
+                    for (const [key,value] of Object.entries(res)){
+                        $("#add-emergency-to-available-form #error-"+key).html(value[0])
+                    }
+                } 
+            },
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+
+    })
     $("#user-filter").change(function(){
         user = $(this).val()
         
@@ -392,6 +462,7 @@ $(document).ready(function () {
             }
         });
     })
+    
     $("#start-filter").change(function(){
         user = $(this).val()
         category = $(this).val()

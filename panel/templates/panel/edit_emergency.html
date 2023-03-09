@@ -1,0 +1,67 @@
+{% comment %} editEmergency {% endcomment %}
+<div class="modal fade" id="editEmergency" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog ">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Edit Category</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+            <form action="" novalidate method="post" id="edit-emergency-form">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label for="Categoryname" class="form-label">
+                        <span class="material-symbols-outlined">
+                            category
+                        </span>
+                        <span>Emergency Percentage</span>
+                    </label>
+                    {{emergency_form.emergency_percentage}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-emergency_percentage"></li>
+                        </ul>
+                        </div>
+                </div>
+                
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary mb-3  hvr-float w-100">Save Change</button>
+                </div>
+                
+            </form>
+        </div>
+
+        
+    </div>
+    </div>
+</div>
+
+<script>
+    function edit_emergency()
+    {
+        $.ajax({
+            url : "/panel/edit-emergency/", // create institution
+            //type : "POST", // http method
+            //data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                res = JSON.parse(res)
+                for (const [key,value] of Object.entries(res))
+                {
+                    $("#edit-emergency-form #id_"+key).val(value)
+                }
+                
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+    }
+    
+</script>

@@ -1,4 +1,5 @@
 {% load multiple %}
+{% load humanize %}
 <div class="table-responsive">
     <table class="table table-striped table-hover">
         <thead>
@@ -17,21 +18,21 @@
                 <td>{{object.category}}</td>
                 <td>{{object.created_at}}</td>
                 {% if object.request_type == 'income' %}
-                <td class="text-success">{{object.amount}}</td>
+                <td class="text-success">{{object.amount|intcomma}}</td>
                 {% elif object.request_type == 'expense' %}
-                <td class="text-danger">{{object.amount}}</td>
+                <td class="text-danger">{{object.amount|intcomma}}</td>
                 {% else %}
                 {% if request.user.is_superuser %}
                     {% if object.category.name == 'Reserved Income to shareholders' or object.category.name == 'Reversed Available to shareholder' %}
-                    <td class="">{{object.amount}}</td>
+                    <td class="">{{object.amount|intcomma|intcomma}}</td>
                     {% else %}
-                    <td class="">{{object.amount}}</td>
+                    <td class="">{{object.amount|intcomma}}</td>
                     {% endif %}
                 {% else %}
                 {% if object.category.name == 'Reserved Income to shareholders' or object.category.name == 'Reversed Available to shareholder' %}
-                    <td class="">{{object.amount}}</td>
+                    <td class="">{{object.amount|intcomma}}</td>
                     {% else %}
-                    <td class="">{{object.user_amount}}</td>
+                    <td class="">{{object.user_amount|intcomma}}</td>
                     {% endif %}
                 {% endif %}
                 
