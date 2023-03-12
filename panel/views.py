@@ -8,6 +8,7 @@ from core.forms import WalletForm,EmergencyPerForm
 from core.models import Wallet
 from account.utils import DecimalEncoder
 from request.models import Request
+from request.forms import RequestForm
 from django.contrib.auth.models import User
 from django.db.models import Q
 from .models import Category
@@ -23,6 +24,7 @@ def panel(request):
     edit_form = EditForm()
     category_form = CategoryForm()
     emergency_form = EmergencyPerForm()
+    request_form = RequestForm()
     users = User.objects.all().order_by('id')
     paginator = Paginator(users,10)
     page = request.GET.get('page1')
@@ -42,7 +44,7 @@ def panel(request):
     except EmptyPage:
         categories = paginator.page(paginator.num_pages)
 
-    transactions = Request.objects.filter(request_type='Pending').order_by('id')
+    transactions = Request.objects.filter(request_type='pending').order_by('id')
     paginator = Paginator(transactions,10)
     page = request.GET.get('page3')
     try:
@@ -55,13 +57,13 @@ def panel(request):
     emergency = Wallet.objects.last()
     
 
-    to_pay = Request.objects.filter((Q(amount__lte=request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[request.user]),users__in=[request.user],is_pay=False)
+    to_pay = Request.objects.filter((Q(amount__lte=request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[request.user]) & Q(request_type='expense'),users__in=[request.user])
     to_approve = Request.objects.filter(is_approved=False)
     if len(to_pay) == 0 and len(to_approve) == 0:
         has_notify = False
     else:
         has_notify = True
-    return render(request,'admin_panel.html', context={'signup_form':signup_form,'wallet_form':wallet_form,'edit_form':edit_form,'password_change':password_change_form,'category_form':category_form,'users':users,'categories':categories,'emergency_form':emergency_form,'emergency':emergency,'objects':transactions,'has_notify':has_notify})
+    return render(request,'admin_panel.html', context={'signup_form':signup_form,'wallet_form':wallet_form,'edit_form':edit_form,'password_change':password_change_form,'category_form':category_form,'users':users,'categories':categories,'emergency_form':emergency_form,'emergency':emergency,'objects':transactions,'has_notify':has_notify,'request_form':request_form})
 
 
 def add_category(request):
@@ -143,4 +145,43 @@ def delete_category(request,id):
         return redirect('panel')
     except Exception as e:
         messages.error(request,e)
+        return redirect('panel')
+    
+
+def edit_request(request,id):
+    try:
+        e_request = Request.objects.get(id = id)
+        request_form = RequestForm(instance=e_request)
+    except Exception as e: 
+        return redirect('panel')
+    if request.method == 'POST':
+        request_form = RequestForm(request.POST,request.FILES,instance=e_request)
+        if request_form.is_valid():
+            request_form.save()
+            e_request.approved_list.set(request_form.cleaned_data['users'])
+            e_request.save()
+            return HttpResponse(
+                json.dumps({"result":True})
+        )
+        
+        return HttpResponse(json.dumps(
+            request_form.errors
+            ,ensure_ascii = False)
+        )
+    id_input = '<input type="hidden" id="request_id" name="request_id" value="'+str(id)+'">'
+    return HttpResponse([request_form,id_input])
+
+
+def print(request,id):
+    try:
+        e_request = Request.objects.get(id = id)
+        form = RequestForm(instance=e_request)
+        html = f"<div style='margin:20px'><div><h3>Request ID: #{e_request.id}</h3></div><br><div><lable>Category : </lable><lable>{form['category']}</lable></div><br>\
+            <div><lable>Date : </lable><lable>{form['start_at']}</lable></div><br>\
+            <div><lable>Amount (SR) : </lable><lable><b>{form['amount']}</b></lable></div><br>\
+            <div><lable>Attachment : </lable><lable>{e_request.attachment}</lable></div><br>\
+            <div><lable>Note : </lable><br><lable>{e_request.note}</lable></div><br>\
+            <div><lable>Participants : </lable>{form['users']}</div></div>"
+        return HttpResponse(html)
+    except Exception as e: 
         return redirect('panel')

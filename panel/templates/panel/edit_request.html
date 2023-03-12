@@ -1,0 +1,123 @@
+
+<div class="modal fade" id="editRequest" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog ">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">New Request</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+            <form action="" enctype="multipart/form-data" id="edit-request-form"  method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="TransactionCategory" class="form-label">
+                        <span>Transaction Category</span>
+                    </label>
+                    <input id="user_id" type="hidden" name="user_id">
+                    {{request_form.category}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-category"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="date" class="form-label">
+                        <span>Date</span>
+                    </label>
+                    {{request_form.start_at}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-start_at"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="Amount" class="form-label">
+                        <span>Amount ( RS )</span>
+                    </label>
+                    {{request_form.amount}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-amount"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="Attachment" class="form-label">
+                        <span>Attachment</span>
+                    </label>
+                    {{request_form.attachment}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-attachment"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="note" class="form-label">
+                        <span>Note (optional)</span>
+                    </label>
+                    {{request_form.note}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-note"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="Participants" class="form-label">
+                        <span>Participants</span>
+                    </label>
+                    {{request_form.users}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-users"></li>
+                        </ul>
+                    </div>
+                </div>
+
+            
+                <div class="text-center mt-5">
+                    <button type="submit" class="btn btn-primary mb-3  hvr-float w-100">Save</button>
+                </div>
+                
+            </form>
+        </div>
+        
+    </div>
+    </div>
+</div>
+<script>
+    function edit_request(id)
+        {
+        $.ajax({
+            url : "/panel/edit-request/"+id+"/", // create institution
+            //type : "POST", // http method
+            //data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                res = $(res)
+                console.log('work')
+                console.log($(res))
+                
+                    $("#editRequest #id_category").replaceWith($(res[0].innerHTML)[2].innerHTML)
+                    $("#editRequest #id_start_at").replaceWith($(res[4].innerHTML)[2].innerHTML)
+                    $("#editRequest #id_amount").replaceWith($(res[6].innerHTML)[2].innerHTML)
+                    $("#editRequest #id_attachment").replaceWith($(res[8].innerHTML)[2].innerHTML)
+                    $("#editRequest #id_note").replaceWith($(res[10].innerHTML)[2].innerHTML)
+                    $("#editRequest #id_users").replaceWith($(res[2].innerHTML)[2].innerHTML)
+                    $("#editRequest #user_id").replaceWith($(res[11]))
+                
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+    }
+</script>

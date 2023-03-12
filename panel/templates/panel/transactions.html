@@ -5,11 +5,9 @@
             <tr>
             <th scope="col">#</th>
             <th scope="col">Transaction Category </th>
-            <th scope="col">Date</th>
             <th scope="col">Amount</th>
-            <th scope="col">Attachment</th>
-            <th scope="col">Note</th>
-            <th scope="col">Participants</th>
+            <th>User</th>
+            <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -17,7 +15,6 @@
             <tr>
                 <th scope="row">{{object.id}}</th>
                 <td>{{object.category}}</td>
-                <td>{{object.start_at}}</td>
                 {% if object.owner.wallet.limit < object.amount  %}
                 <td class="text-danger">{{object.amount|intcomma}}</td>
                 {% elif object.owner.wallet.limit > object.amount %}
@@ -26,20 +23,15 @@
                 <td class="">{{object.amount|intcomma}}</td>
                 {% endif %}
                 
-                <td>{{object.attachment}}</td>
-                <td>{{object.note}}</td>
+                
                 <td class="users">
-                    {% for user in object.users.all %}
-                    {% if user == object.owner %}
-                    <i class="fa-solid fa-circle-user rounded-circle mt-1 fs-3 text-danger" data-bs-toggle="tooltip" data-bs-placement="top" title="{{user}}:{{user.wallet.limit}}"></i>
-                    {% else %}
-                    <i class="fa-solid fa-circle-user rounded-circle mt-1 fs-3" data-bs-toggle="tooltip" data-bs-placement="top" title="{{user}}"></i>
-                    {% endif %}
-                    
-                    {% endfor %}
+                    <i class="fa-solid fa-circle-user rounded-circle mt-1 fs-3" data-bs-toggle="tooltip" data-bs-placement="top" title="{{object.owner.first_name}}"></i>
                 </td>
                 <td>
                     <button class="btn btn-success" onclick="complete({{object.id}})">Complete</button>
+                    <button class="btn btn-warning" onclick="edit_request({{object.id}})" data-bs-toggle="modal" data-bs-target="#editRequest">Edit</button>
+                    <button class="btn btn-danger" onclick="reject({{object.id}})">Reject</button>
+                    <button class="btn btn-primary" onclick="print({{object.id}})">Print</button>
                 </td>
                 </tr>
             {% endfor %}
@@ -70,4 +62,81 @@
             });
         }
         
+    function reject(id)
+        {
+            $.ajax({
+                url : "/request/reject/"+id+"/", // create institution
+                //type : "POST", // http method
+                //data : formData, // data sent with the post request
+                cache: false,
+                contentType: false,
+                processData: false,
+                success : function(res) {
+                    
+                    window.location.reload();
+                          
+                },
+    
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(err)
+                }
+            });
+        }
+
+    function edit_request(id)
+        {
+        $.ajax({
+            url : "/request/edit-request/"+id+"/", // create institution
+            //type : "POST", // http method
+            //data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                res = JSON.parse(res)
+                
+                for (const [key,value] of Object.entries(res))
+                {
+                    $("#edit-request-form #id_"+key).val(value)
+                }
+                $("#request_id").val(res.id)
+                
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+    }
+    function print(id)
+    {
+        $.ajax({
+            url : "/panel/print-request/"+id+"/", // create institution
+            //type : "POST", // http method
+            //data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                
+                
+                html2pdf()
+                    .from(res)
+                    .save();
+                //w=window.open();
+                //w.document.write(res);
+                //w.print();
+                //w.close();
+                
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+        
+    }
 </script>

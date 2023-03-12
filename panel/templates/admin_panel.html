@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'fontawesome-free/css/all.min.css' %}">
 	<link rel="stylesheet" href="{% static 'css/hover-min.css' %}">
 	<link rel="stylesheet" href="{% static 'css/animation_library.css' %}">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!--my style -->
     {% webpush_header %}
     {% progressive_web_app_meta %}
@@ -89,7 +90,7 @@
     <div class="body py-4 px-2 px-lg-4">
 
         <div class="p-3 bg_scoundary_color mt-1">
-            <h4 class="Tajawal-Bold">Users</h4>
+            <h4 class="Tajawal-Bold">Transactions</h4>
             <hr>
             {% include 'panel/transactions.html' %}
             <!-- Pagination-->
@@ -117,7 +118,7 @@
                 </ul>
               </nav>
         </div>
-
+        <br>
         <!-- Add new User button-->
         <button type="button" class="btn btn-primary vhr-float mb-2" data-bs-toggle="modal" data-bs-target="#addNewUser">
             <span class="material-symbols-outlined mt-lg-1">
@@ -228,9 +229,12 @@
     {% include 'panel/delete_confirm_category.html' %}
     {% include 'panel/edit_admin.html' %}
     {% include 'panel/edit_emergency.html' %}
+    {% include 'panel/edit_request.html' %}
+    {% comment %} {% include 'panel/printable.html' %} {% endcomment %}
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>
+    
     <script src="{% static 'js/backend.js' %}"></script>
     <script src="{% static 'js/myscript.js' %}"></script>
    

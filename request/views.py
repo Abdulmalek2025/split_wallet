@@ -55,7 +55,7 @@ def add_request(request):
             object = request_form.save(commit=False)
             object.owner = request.user
             object.is_main = True
-            object.request_type = 'Not approved'
+            object.request_type = 'not approved'
             
             object.save()
 
@@ -63,24 +63,16 @@ def add_request(request):
             
             if object.user_amount <= request.user.wallet.limit and object.category in request.user.wallet.category_list.all():
                 object.approved_list.add(request.user)
-                # object.pay_list.add(request.user)
-                # wallet = Wallet.objects.get(user=request.user)
-                # wallet.available_balance -= request_form.cleaned_data['amount']
-                # wallet.save()
-                # object.is_pay = True
-                
                 object.save()
+
                 for user in object.users.all():
                     if user.wallet.limit >= object.user_amount and user != request.user and object.category in request.user.wallet.category_list.all():
                         object.approved_list.add(user)
                         object.save()
-                for user in object.approved_list.all():
-                    payload = {"head": "Welcome!", "body": f"Hi {user.username}, you have new request","icon":"/static/images/logo.png",'url':reverse(requests),}
-                    send_user_notification(user=user, payload=payload, ttl=1000)
             
             if object.approved_list.all().count() == object.users.all().count():
                 object.is_approved = True
-                object.request_type = 'Pending'
+                object.request_type = 'pending'
             else:
                 object.is_approved = False
 
@@ -89,9 +81,6 @@ def add_request(request):
                 for user in users:
                     send_user_notification(user=user, payload=payload, ttl=1000)
             object.save()
-            # wallet = Wallet.objects.get(user=request.user)
-            # wallet.available_balance -= request_form.cleaned_data['amount']
-            # wallet.save()
 
             
             return HttpResponse(
@@ -159,7 +148,7 @@ def add_reversed_to_available(request):
             object.request_type = ''
             object.is_main = True
             object.save()
-            users = User.objects.all()
+            users = User.objects.all().exclude(is_superuser=True)
             for user in users:
                 object.users.add(user)
                 object.save()
@@ -239,7 +228,7 @@ def review(request,id):
     return HttpResponse(request_form)
 
 def pay(request, id):
-    # the request that I will pay for it
+    # the main request 
     me_request = Request.objects.get(id=id)
     wallet = Wallet.objects.get(user=request.user)
     #count number of users in the request and take from current user balance and add to the request owner balance
@@ -248,7 +237,7 @@ def pay(request, id):
     # the wallet of request owner that will pay for it
     reciever_wallet = Wallet.objects.get(user=me_request.owner)
     sender = Request.objects.create(amount=me_request.user_amount,owner=request.user,note='{0} pay to {1}'.format(request.user,me_request.owner),category=me_request.category,request_type='expense',start_at=datetime.datetime.now(),is_pay=True,is_approved=True)
-    sender.pay_list.add(me_request.owner)
+    sender.pay_list.add(request.user)
     sender.users.add(me_request.owner)
     sender.users.add(request.user)
     sender.save()
@@ -289,7 +278,7 @@ def edit_approve(request,id):
                 # wallet.save()
                 # me_request.is_pay = True
             me_request.is_approved = True
-            me_request.request_type = 'Pending'
+            me_request.request_type = 'pending'
             me_request.save()
             payload = {"head": "Welcome!", "body": f"New you have new request to complete","icon":"/static/images/logo.png",'url':reverse(requests),}
             send_user_notification(user=User.objects.get(is_superuser=True), payload=payload, ttl=1000) 
@@ -316,4 +305,12 @@ def complete(request,id):
     wallet = Wallet.objects.get(user=object.owner)
     wallet.available_balance -= object.amount
     wallet.save()    
+    return HttpResponse({'result':True})
+
+
+def reject(request,id):
+    object = Request.objects.get(id=id)
+    object.request_type = 'rejected'
+    object.save()
+        
     return HttpResponse({'result':True})

@@ -35,7 +35,9 @@ def create_user(request):
             wallet = wallet_form.save(commit=False)
             wallet.user = user
             wallet.save()
-            wallet.save_m2m()
+            wallet_form.save_m2m()
+            
+            
             # Wallet.objects.create(limit=wallet_form.cleaned_data['limit'],share_percentage=wallet_form.cleaned_data['share_percentage'],user=user)
             messages.success(request,"New user is added successfully '{0}'".format(signup_form.cleaned_data['username']))
             return HttpResponse(

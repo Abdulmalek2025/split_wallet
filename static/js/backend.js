@@ -570,4 +570,43 @@ $(document).ready(function () {
             }
         });
     })
+
+    //editRequest
+    $("#edit-request-form").submit(function (event) {
+        event.preventDefault()
+        var formData = new FormData(this);
+        $.ajax({
+            url : "/panel/edit-request/"+$("#edit-request-form #request_id").val()+"/", // create institution
+            type : "POST", // http method
+            data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                res = JSON.parse(res)
+                $("#edit-request-form #error-category").html('')
+                $("#edit-request-form #error-start_at").html('')
+                $("#edit-request-form #error-amount").html('')
+                $("#edit-request-form #error-attachment").html('')
+                $("#edit-request-form #error-note").html('')
+                $("#edit-request-form #error-users").html('')
+                if(res.result == true)
+                {
+                    window.location.reload();
+                }
+                else{
+                    for (const [key,value] of Object.entries(res))
+                    {
+                        $("#edit-request-form #error-"+key).html(value)
+                    }
+                }    
+            },
+
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
+
+    })
 })

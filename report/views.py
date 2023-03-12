@@ -23,10 +23,10 @@ class ReportView(LoginRequiredMixin,ListView):
     def get_queryset(self):
         if self.request.user.is_superuser:
             # all system transactions
-            return Request.objects.all().order_by('id')
+            return Request.objects.filter(is_main=True).order_by('id')
         else:
             # all transaction its owner or in pay_list
-            return Request.objects.filter(Q(owner=self.request.user) | Q(pay_list__in=[self.request.user])).order_by('id') #here use filter
+            return Request.objects.filter(Q(owner=self.request.user) ,is_main=False).order_by('id') #here use filter
 
     def get_context_data(self, **kwargs):
         context = super(ReportView, self).get_context_data(**kwargs)
@@ -42,8 +42,11 @@ class ReportView(LoginRequiredMixin,ListView):
         if len(dates) > 0:
             for date in dates:
                 lts = [0]* len(header)
-                lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-                c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+                lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])
+                if self.request.user.is_superuser:       
+                    c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False,is_main=True).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+                else:
+                    c = Request.objects.filter(owner=self.request.user,start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False,is_main=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
                 for c1 in c:
                     for cat in categories:
                         if c1['category__name'] == cat.name:
@@ -54,7 +57,7 @@ class ReportView(LoginRequiredMixin,ListView):
             arr.append(lts)
         context['list'] = arr 
         context['users'] = User.objects.all()
-        to_pay = Request.objects.filter((Q(amount__lte=self.request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[self.request.user]),users__in=[self.request.user],is_pay=False)
+        to_pay = Request.objects.filter((Q(amount__lte=self.request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[self.request.user]) & Q(request_type='expense'),users__in=[self.request.user])
         to_approve = Request.objects.filter(is_approved=False)
         if len(to_pay) == 0 and len(to_approve) == 0:
             has_notify = False
@@ -80,15 +83,15 @@ def filter_user(request,user):
         header.append(category.name)
     arr.append(header)
     if user > 0:
-        dates = Request.objects.filter(Q(owner=User.objects.get(id=user).id) | Q(users__in=[User.objects.get(id=user)])).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
+        dates = Request.objects.filter(Q(owner=User.objects.get(id=user).id) | Q(users__in=[User.objects.get(id=user)]),is_main=False).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
     else:
-        dates = Request.objects.all().values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
+        dates = Request.objects.filter(is_main=True).values('start_at__month','start_at__year').distinct().order_by('start_at__year','start_at__month')
     if len(dates) > 0:
         for date in dates:
             lts = [0]* len(header)
             lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])     
             if user == 0:       
-                c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+                c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False,is_main=True).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
             else:
                 c = Request.objects.filter(Q(owner=user),start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
             for c1 in c:
@@ -119,8 +122,11 @@ def filter_category(request,category):
     if len(dates) >0:
         for date in dates:
             lts = [0]* len(header)
-            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-            c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])
+            if request.user.is_superuser:            
+                c = Request.objects.filter(is_main=True,start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            else:
+                c = Request.objects.filter(owner=request.user,is_main=False,start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
             for c1 in c:
                 for cat in categories:
                     if c1['category__name'] == cat.name:
@@ -144,8 +150,11 @@ def filter_start(request,start):
     if len(dates) > 0:
         for date in dates:
             lts = [0]* len(header)
-            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-            c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])       
+            if request.user.is_superuser:     
+                c = Request.objects.filter(is_main=True,start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            else:
+                c = Request.objects.filter(owner=request.user,is_main=False,start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
             for c1 in c:
                 for cat in categories:
                     if c1['category__name'] == cat.name:
@@ -168,8 +177,11 @@ def filter_end(request,end):
     if len(dates) > 0:
         for date in dates:
             lts = [0]* len(header)
-            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])            
-            c = Request.objects.filter(start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            lts[0] = "{0}-{1}".format(date['start_at__month'],date['start_at__year'])  
+            if request.user.is_superuser:          
+                c = Request.objects.filter(is_main=True,start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
+            else:
+                c = Request.objects.filter(owner=request.user,is_main=False,start_at__month=date['start_at__month'],start_at__year=date['start_at__year'],category__name__isnull=False).values('category__name').annotate(total=Sum('amount')).order_by('start_at__year','start_at__month','category__name')
             for c1 in c:
                 for cat in categories:
                     if c1['category__name'] == cat.name:
@@ -195,7 +207,7 @@ def download_file(request):
         if request.user.is_superuser:
             requests = Request.objects.all()
         else:
-            requests = Request.objects.filter(Q(owner=request.user)|Q(users__in=[request.user]))
+            requests = Request.objects.filter(Q(owner=request.user))
     except Request.DoesNotExist:
         requests = None
     if requests is not None:
@@ -208,7 +220,11 @@ def download_file(request):
             if request.pay_list.all():
                 for user in request.pay_list.all():
                     pay_list.append(user.first_name)
-            writer.writerow([request.category,request.owner,request.start_at,request.amount,pay_list,users,request.note,request.attachment])
+            if request.request_type == 'expense':
+                amount = request.amount*(-1)
+            else:
+                amount = request.amount
+            writer.writerow([request.category,request.owner,request.start_at,amount,pay_list,users,request.note,request.attachment])
             users.clear()
             pay_list.clear()
     else:
