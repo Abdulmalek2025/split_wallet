@@ -20,7 +20,7 @@
                 {% if object.request_type == 'income' %}
                 <td class="text-success">{{object.amount|intcomma}}</td>
                 {% elif object.request_type == 'expense' %}
-                <td class="text-danger">{{object.amount|intcomma}}</td>
+                <td class="text-danger">-{{object.amount|intcomma}}</td>
                 {% else %}
                 {% if request.user.is_superuser %}
                     {% if object.category.name == 'Reserved Income to shareholders' or object.category.name == 'Reversed Available to shareholder' %}

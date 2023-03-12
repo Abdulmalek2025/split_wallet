@@ -1,19 +1,19 @@
-<div class="modal fade" id="Emergency_to_Available" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="adminRequest" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog ">
     <div class="modal-content">
         <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Reserved to Available</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 class="modal-title" id="exampleModalLabel">New Request</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
 
         <div class="modal-body">
-            <form id="add-emergency-to-available-form" action="{% url 'add_emergency_to_available' %}" method="post" enctype="multipart/form-data" novalidate >
+            <form action="{% url 'admin_request' %}" enctype="multipart/form-data" id="admin-request-form"  method="post" novalidate>
                 {% csrf_token %}
                 <div class="mb-3">
                     <label for="TransactionCategory" class="form-label">
                         <span>Transaction Category</span>
                     </label>
-                    {{emergency_form.category}}
+                    {{request_form.category}}
                     <div class="invalid-feedback d-block">
                         <ul class="errorlist">
                             <li id="error-category"></li>
@@ -24,7 +24,7 @@
                     <label for="date" class="form-label">
                         <span>Date</span>
                     </label>
-                    {{emergency_form.start_at}}
+                    {{request_form.start_at}}
                     <div class="invalid-feedback d-block">
                         <ul class="errorlist">
                             <li id="error-start_at"></li>
@@ -35,7 +35,7 @@
                     <label for="Amount" class="form-label">
                         <span>Amount ( SAR )</span>
                     </label>
-                    {{emergency_form.amount}}
+                    {{request_form.amount}}
                     <div class="invalid-feedback d-block">
                         <ul class="errorlist">
                             <li id="error-amount"></li>
@@ -46,7 +46,7 @@
                     <label for="Attachment" class="form-label">
                         <span>Attachment</span>
                     </label>
-                    {{emergency_form.attachment}}
+                    {{request_form.attachment}}
                     <div class="invalid-feedback d-block">
                         <ul class="errorlist">
                             <li id="error-attachment"></li>
@@ -57,14 +57,26 @@
                     <label for="note" class="form-label">
                         <span>Note (optional)</span>
                     </label>
-                    {{emergency_form.note}}
+                    {{request_form.note}}
                     <div class="invalid-feedback d-block">
                         <ul class="errorlist">
                             <li id="error-note"></li>
                         </ul>
                     </div>
                 </div>
-                                
+                <div class="mb-3">
+                    <label for="Participants" class="form-label">
+                        <span>Participants</span>
+                    </label>
+                    {{request_form.users}}
+                    <div class="invalid-feedback d-block">
+                        <ul class="errorlist">
+                            <li id="error-users"></li>
+                        </ul>
+                    </div>
+                </div>
+
+            
                 <div class="text-center mt-5">
                     <button type="submit" class="btn btn-primary mb-3  hvr-float w-100">Save</button>
                 </div>

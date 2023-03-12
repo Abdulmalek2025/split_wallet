@@ -96,6 +96,12 @@
             {% endif %}
             
             {% if user.is_superuser %}
+            <button type="button" class="btn btn-primary vhr-float mx-md-2 mb-2" data-bs-toggle="modal" data-bs-target="#adminRequest">
+                <span class="material-symbols-outlined mt-lg-1">
+                    add
+                </span>
+                New Request 
+            </button>
             <button type="button" class="btn btn-primary vhr-float mx-md-2 mb-2" data-bs-toggle="modal" data-bs-target="#reservedIncome">
                 <span class="material-symbols-outlined mt-lg-1">
                     add
@@ -119,7 +125,7 @@
         </div>
         <!-- The Bill Details-->
         <div class="row Bill_Details mt-3" >
-            <div class="col-12 col-md mb-2  py-4 text-center" style="background:#A9CCE3">
+            <div class="col-12 col-md mb-2  py-4 text-center" style="background:#C3E3A9">
                 <h4>Available Balance</h4>
                 {% if request.user.is_superuser %}
                 <h2 class="Tajawal-Bold">{{user.wallet.total_available|floatformat:2|intcomma}} SAR</h2>
@@ -230,7 +236,7 @@
     {% include 'core/new_available.html' %}
     {% comment %} Emergency_to_Available {% endcomment %}
     {% include 'core/emergency.html' %}
-
+    {% include 'core/admin_request.html' %}
     <script src="{% static 'js/jquery.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>
     <script src="{% static 'js/bootstrap.min.js' %}"></script>

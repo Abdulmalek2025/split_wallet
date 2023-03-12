@@ -8,7 +8,7 @@ class WalletForm(forms.ModelForm):
     reversed_account = forms.DecimalField(required=False,widget=forms.NumberInput(attrs={'class':'formcontrol'}))
     share_percentage = forms.DecimalField(widget=forms.NumberInput(attrs={'class':'form-control'}))
     limit = forms.DecimalField(widget=forms.NumberInput(attrs={'class':'form-control'}))
-    category_list = forms.ModelMultipleChoiceField(required=False,queryset=Category.objects.all(),widget=forms.CheckboxSelectMultiple)
+    category_list = forms.ModelMultipleChoiceField(required=False,queryset=Category.objects.filter(visible=True),widget=forms.CheckboxSelectMultiple)
     class Meta:
         model = Wallet
         fields = ('available_balance','reversed_account', 'share_percentage', 'limit', 'category_list')

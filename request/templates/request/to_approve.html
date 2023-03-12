@@ -23,6 +23,7 @@
                     <td>{{request.amount|floatformat:2|intcomma}}</td>
                     <td class="text-center text-md-end">
                     <button type="button" onclick="ap_approve({{request.id}})" data-bs-toggle="modal" data-bs-target="#approveModal" class="btn btn-success mb-2 mb-md-0">Approve</button>
+                    <button type="button" onclick="reject({{request.id}})" class="btn btn-danger mb-2 mb-md-0">Reject</button>
                     <button type="button" onclick="ap_review({{request.id}})"  data-bs-toggle="modal" data-bs-target="#newRequest" class="btn btn-primary">Review</button>
                     </td>
                 </tr>
@@ -133,4 +134,25 @@
       }
   });
   }
+  function reject(id)
+        {
+            $.ajax({
+                url : "/request/reject/"+id+"/", // create institution
+                //type : "POST", // http method
+                //data : formData, // data sent with the post request
+                cache: false,
+                contentType: false,
+                processData: false,
+                success : function(res) {
+                    
+                    window.location.reload();
+                          
+                },
+    
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    console.log(err)
+                }
+            });
+        }
 </script>

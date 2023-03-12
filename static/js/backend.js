@@ -284,7 +284,41 @@ $(document).ready(function () {
         });
 
     })
+    $("#admin-request-form").submit(function (event) {
+        event.preventDefault()
+        var formData = new FormData(this);
+        $.ajax({
+            url : "/request/admin-request/", // create institution
+            type : "POST", // http method
+            data : formData, // data sent with the post request
+            cache: false,
+            contentType: false,
+            processData: false,
+            success : function(res) {
+                $("#admin-request-form #error-category").html('')
+                $("#admin-request-form #error-users").html('')
+                $("#admin-request-form #error-start_at").html('')
+                $("#admin-request-form #error-amount").html('')
+                $("#admin-request-form #error-attachment").html('')
+                $("#admin-request-form #error-note").html('')
+                res = JSON.parse(res)
+                if (res.result == true){
+                    window.location.reload();
+                }
+                else{
+                    
+                    for (const [key,value] of Object.entries(res)){
+                        $("#admin-request-form #error-"+key).html(value[0])
+                    }
+                } 
+            },
+            // handle a non-successful response
+            error : function(xhr,errmsg,err) {
+                console.log(err)
+            }
+        });
 
+    })
     $("#add-reversed-income-form").submit(function (event) {
         event.preventDefault()
         var formData = new FormData(this);

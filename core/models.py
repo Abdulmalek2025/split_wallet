@@ -17,7 +17,7 @@ class Wallet(models.Model):
     share_percentage = models.DecimalField(max_digits=7,decimal_places=5,validators=[MinValueValidator(1),MaxValueValidator(100)])
     limit = models.DecimalField(max_digits=10,decimal_places=2,default=0)
     emergency_balance = models.DecimalField(max_digits=10, decimal_places=2,default=0)
-    emergency_percentage = models.DecimalField(max_digits=5,decimal_places=3,validators=[MinValueValidator(1),MaxValueValidator(100)],default=10)
+    emergency_percentage = models.DecimalField(max_digits=5,decimal_places=3,validators=[MinValueValidator(0),MaxValueValidator(100)],default=10)
     category_list = models.ManyToManyField(Category,related_name='categories')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

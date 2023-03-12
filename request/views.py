@@ -24,7 +24,7 @@ def requests(request):
     except EmptyPage:
         to_pay = paginator.page(paginator.num_pages)
 
-    to_approve = Request.objects.filter(is_approved=False)
+    to_approve = Request.objects.filter(is_approved=False,request_type="not approved")
     paginator = Paginator(to_approve,10)
     page = request.GET.get('page2')
     try:
@@ -83,6 +83,32 @@ def add_request(request):
             object.save()
 
             
+            return HttpResponse(
+                json.dumps({"result":True})
+        )
+
+        return HttpResponse(json.dumps(
+            request_form.errors
+            ,ensure_ascii = False)
+        )
+    return HttpResponse(json.dumps({"result":True}))
+
+def admin_request(request):
+    if request.method == "POST":
+        request_form = RequestForm(request.POST,request.FILES)
+
+        if request_form.is_valid():
+            object = request_form.save(commit=False)
+            object.owner = request.user
+            object.is_main = True
+            object.request_type = 'pending'
+            
+            object.save()
+
+            request_form.save_m2m()
+            object.approved_list.set(object.users.all())
+            object.is_approved = True
+            object.save()          
             return HttpResponse(
                 json.dumps({"result":True})
         )
@@ -300,11 +326,24 @@ def complete(request,id):
     object = Request.objects.get(id=id)
     object.request_type = 'expense'
     object.is_pay = True
-    object.pay_list.add(object.owner)
-    object.save()
-    wallet = Wallet.objects.get(user=object.owner)
-    wallet.available_balance -= object.amount
-    wallet.save()    
+    if object.owner.is_superuser:
+        for user in object.users.all():
+            object.pay_list.add(user)
+            object.save()
+            wallet = Wallet.objects.get(user=user)
+            trans = Request.objects.create(owner=user,amount=object.user_amount,category=object.category,request_type='expense',start_at=datetime.datetime.now(),is_pay=True,is_approved=True)
+            trans.users.set([user,object.owner])
+            trans.approved_list.set([user,object.owner])
+            trans.pay_list.set([user,object.owner])
+            trans.save()
+            wallet.available_balance -= object.user_amount
+            wallet.save() 
+    else:
+        object.pay_list.add(object.owner)
+        object.save()
+        wallet = Wallet.objects.get(user=object.owner)
+        wallet.available_balance -= object.amount
+        wallet.save()    
     return HttpResponse({'result':True})
 
 

@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import requests,add_request, add_reversed_income,add_reversed_to_available,\
-      review, pay, approve, edit_approve,add_emergency_to_available, complete
+      review, pay, approve, edit_approve,add_emergency_to_available, complete,reject,admin_request
 
 urlpatterns = [
     path('',requests, name='requests'),
@@ -13,4 +13,6 @@ urlpatterns = [
     path('approve/<int:id>', approve, name='approve'),
     path('edit-approve-list/<int:id>/',edit_approve, name="edit_approve"),
     path('complete/<int:id>/',complete, name='complete'),
+    path('reject/<int:id>/',reject,name='reject'),
+    path('admin-request/',admin_request, name="admin_request")
 ]

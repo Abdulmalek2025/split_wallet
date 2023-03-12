@@ -8,6 +8,7 @@
             <th scope="col">Date</th>
             <th scope="col">Amount</th>
             <th scope="col">Attachment</th>
+            <th scope="col">Status</th>
             <th scope="col">Note</th>
             <th scope="col">Participants</th>
             </tr>
@@ -27,6 +28,7 @@
                 {% endif %}
                 
                 <td>{{object.attachment}}</td>
+                <td>{% if object.request_type == 'rejected' %}Rejected {% elif object.request_type == 'not approved' %}Not approved {% else %}Completed{% endif %}</td>
                 <td>{{object.note}}</td>
                 <td class="users">
                     {% for user in object.users.all %}

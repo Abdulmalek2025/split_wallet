@@ -48,7 +48,7 @@ class IndexView(LoginRequiredMixin, ListView):
             context['month_expense'] = Request.objects.filter(start_at__month=today.month, request_type='expense',owner=self.request.user).aggregate(Sum('amount'))
         context['wallet'] = Wallet.objects.get(user=self.request.user)
         to_pay = Request.objects.filter((Q(amount__lte=self.request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[self.request.user]) & Q(request_type='expense'),users__in=[self.request.user])
-        to_approve = Request.objects.filter(is_approved=False)
+        to_approve = Request.objects.filter(is_approved=False,request_type="not approved")
         if len(to_pay) == 0 and len(to_approve) == 0:
             has_notify = False
         else:

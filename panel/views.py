@@ -57,8 +57,8 @@ def panel(request):
     emergency = Wallet.objects.last()
     
 
-    to_pay = Request.objects.filter((Q(amount__lte=request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[request.user]) & Q(request_type='expense'),users__in=[request.user])
-    to_approve = Request.objects.filter(is_approved=False)
+    to_pay = Request.objects.filter((Q(is_approved=True)) & ~Q(pay_list__in=[request.user]) & Q(request_type='expense'),users__in=[request.user])
+    to_approve = Request.objects.filter(is_approved=False,request_type="not approved")
     if len(to_pay) == 0 and len(to_approve) == 0:
         has_notify = False
     else:

@@ -58,7 +58,7 @@ class ReportView(LoginRequiredMixin,ListView):
         context['list'] = arr 
         context['users'] = User.objects.all()
         to_pay = Request.objects.filter((Q(amount__lte=self.request.user.wallet.limit) | Q(is_approved=True)) & ~Q(pay_list__in=[self.request.user]) & Q(request_type='expense'),users__in=[self.request.user])
-        to_approve = Request.objects.filter(is_approved=False)
+        to_approve = Request.objects.filter(is_approved=False,request_type="not approved")
         if len(to_pay) == 0 and len(to_approve) == 0:
             has_notify = False
         else:
@@ -202,7 +202,7 @@ def download_file(request):
     writer = csv.writer(response,delimiter=',')
     writer.writerow(['','','','All Transactions'])
     writer.writerow([''])
-    writer.writerow(['Category', 'Owner','Date','Amount','Pay users','Participants','Note','Attachment'])
+    writer.writerow(['Category', 'Owner','Date','Amount','Pay users','Participants','Status','Note','Attachment'])
     try:
         if request.user.is_superuser:
             requests = Request.objects.all()
@@ -224,7 +224,13 @@ def download_file(request):
                 amount = request.amount*(-1)
             else:
                 amount = request.amount
-            writer.writerow([request.category,request.owner,request.start_at,amount,pay_list,users,request.note,request.attachment])
+            if request.request_type == 'not approved':
+                request_type = 'not approved'
+            elif request.request_type == 'rejected':
+                request_type = 'rejected'
+            else:
+                request_type = 'complate'
+            writer.writerow([request.category,request.owner,request.start_at,amount,pay_list,users,request_type,request.note,request.attachment])
             users.clear()
             pay_list.clear()
     else:
